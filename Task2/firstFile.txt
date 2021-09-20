@@ -2,8 +2,8 @@ Line №1 UPDATED STEP 7
 Line №2 UPDATED STEP 7
 Line №3 UPDATED STEP 8
 Line №4 UPDATED STEP 8
-Line №5
-Line №6
+Line №5 UPDATED STEP 18
+Line №6 UPDATED STEP 18
 Line №7
 Line №8
 Line №9
