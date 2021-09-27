@@ -51,6 +51,22 @@
           <version>2.22.1</version>
         </plugin>
         <plugin>
+          <artifactId>maven-assembly-plugin</artifactId>
+          <configuration>
+            <finalName>${project.name}-${project.version}</finalName>
+            <descriptorRefs>
+              <descriptorRef>jar-with-dependencies</descriptorRef>
+            </descriptorRefs>
+            <appendAssemblyId>false</appendAssemblyId>
+            <archive>
+              <manifest>
+                <addClasspath>true</addClasspath>
+                <mainClass>by.shyshaliaksey.api.App</mainClass>
+              </manifest>
+            </archive>
+          </configuration>
+        </plugin>
+        <plugin>
           <artifactId>maven-jar-plugin</artifactId>
           <version>3.0.2</version>
         </plugin>
