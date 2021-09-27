@@ -65,6 +65,12 @@
         <plugin>
           <artifactId>maven-assembly-plugin</artifactId>
           <configuration>
+            <archive>
+              <manifest>
+                <addDefaultImplementationEntries>true</addDefaultImplementationEntries>
+                <addDefaultSpecificationEntries>true</addDefaultSpecificationEntries>
+              </manifest>
+            </archive>
             <finalName>${project.name}-${project.version}</finalName>
             <descriptorRefs>
               <descriptorRef>jar-with-dependencies</descriptorRef>
