@@ -185,9 +185,9 @@ function configure_git_gpg() {
 # function to create postgresql cluster
 ####################################################################
 function configure_postgresql_create_db_cluster() {
-  local directory="/var/lib/psql/data"
+  local directory="/var/lib/pgsql/data"
   echo "Start creating db cluster..."
-  if [ ! -d "${directory}" ]; then
+  if [ ! "$(ls -A ${directory})" ]; then
     if [ "${verbose_flag}" = true ]; then
       sudo postgresql-setup --initdb 1>/dev/null
       if (( $? != 0 )); then return 3; fi;
@@ -196,7 +196,7 @@ function configure_postgresql_create_db_cluster() {
       if (( $? != 0 )); then return 3; fi;
     fi
   else
-    echo "Directory ${directory} exists, please, delete before restart script"
+    echo "Directory ${directory} is not empty, please, delete and restart script"
     return 3
   fi
   echo "Database cluster created successfully!"
