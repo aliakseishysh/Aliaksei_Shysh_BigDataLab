@@ -1,21 +1,49 @@
 #!/bin/bash
 #
 # Performs java, maven, git and postgresql installation
+#
+# Error codes:
+#   3 - Configuration error
+#   4 - Installation error
+#
 
 
 ####################################################################
 # function to print help message
 ####################################################################
-function printHelpMessage {
-  echo "  Script for installing and configurating git, java-1.8.0-openjdk, 
+function print_help_message() {
+  echo "Script for installing and configurating git, java-1.8.0-openjdk, 
   maven and postgresql packages"
-  echo "    -h/--help : echo help message:"
-  echo "    -v/--verbose : run script in verbose mode"
-  echo "  Usage examples:"
-  echo "    bash install.sh -h"
-  echo "    bash install.sh -v"	
+  echo "Usage:"
+  echo "  bash install.sh [options]"
+  echo "Options:"
+  echo "  -h/--help                    echo help message"
+  echo "  -v/--verbose                 run script in verbose mode (only script info)"
+  echo "  -u/--username                username to configure tools for"
+  echo "  -e/--email                   user email (git ssh configuration)"
+  echo "  -n/--name                    user name (git ssh configuration)"
+  echo "  -g/--gpg-key-id              user gpg key id (git gpg configuration)"
+  echo "  -s/--ssh-key-passphrase      user ssh passphrase (git ssh
+                               configuration)"
 }
 
+
+#################################################################### ERROR HANDLING ####################################################################
+
+####################################################################
+# function to exit from programm if error occured
+####################################################################
+function exit_if_error() {
+  local exit_code=$1
+  shift
+  [[ $exit_code ]] &&
+    ((exit_code != 0)) && {
+      printf 'ERROR: %s\n' "$@">&2
+      exit "$exit_code"
+    }
+}
+
+#################################################################### MAIN FUNCTIONS ####################################################################
 
 ####################################################################
 # function to check if package is installed
@@ -24,8 +52,8 @@ function printHelpMessage {
 # RETURN:
 #   true if package is installed, false otherwise
 ####################################################################
-function isInstalled {
-  if yum list installed "$@" >/dev/null 2>/dev/null; then
+function is_installed() {
+  if yum list installed "$@" 1>/dev/null 2>/dev/null; then
     true
   else
     false
@@ -38,21 +66,22 @@ function isInstalled {
 # ARGUMENTS:
 #   Package name to try install
 ####################################################################
-function tryInstall {
-  if isInstalled "$@"; then
-    echo "  $* already installed"
+function try_install() {
+  if is_installed "$@"; then
+    echo "$* already installed"
   else
-    echo "  $* is not installed"
-    echo "  installing $*"
+    echo "$* is not installed"
+    echo "installing $*..."
     if [ "$verbose_flag" = true ]; then
-      sudo yum -y install "$@" >/dev/null 2>/dev/null;
+      sudo yum -y install "$@" 1>/dev/null 2>/dev/null;
     else
       sudo yum -y install "$@"
     fi
-    if isInstalled "$@"; then 
-      echo "  $* successfully installed"; 
+    if is_installed "$@"; then 
+      echo "$* successfully installed!"; 
     else 
-      echo "  error occured while installing $*"; 
+      echo "error occured while installing $*";
+      return 4 
     fi
   fi
 }
@@ -60,9 +89,9 @@ function tryInstall {
 ####################################################################
 # function to set parameters to variables 
 ####################################################################
-function setParameters() {
-  die() { echo "$*" >&2; exit 2; }
-  needs_arg() { if [ -z "$1" ]; then die "No arg for --$OPT option"; fi; }
+function parse_parameters() {
+  function die() { echo "$*" >&2; exit 2; }
+  function needs_arg() { if [ -z "$1" ]; then die "No arg for --$OPT option"; fi; }
 
   OPTIND=1
   help_flag=false
@@ -80,65 +109,162 @@ function setParameters() {
       OPTARG="${OPTARG#=}"             # if long option argument, remove assigning `=`
     fi
     case "$OPT" in
-      h | help)                        help_flag=true ;;                                                # it is impossible specify long options with getopts
-      v | verbose)                     verbose_flag=true ;;                                             # it is impossible specify long options with getopts
-      u | username)                    needs_arg "$OPTARG"; username="$OPTARG" ;;                       # it is impossible specify long options with getopts
-      e | email)                       needs_arg "$OPTARG"; email="$OPTARG" ;;                          # it is impossible specify long options with getopts
-      n | name)                        needs_arg "$OPTARG"; name="$OPTARG" ;;                           # it is impossible specify long options with getopts
-      g | gpg-key-id)                  needs_arg "$OPTARG"; gpg_key_id="$OPTARG" ;;                     # it is impossible specify long options with getopts
-      s | ssh-key-passphrase)          needs_arg "$OPTARG"; ssh_key_passphrase="$OPTARG" ;;             # it is impossible specify long options with getopts
-      ??*)                             die "Illegal option --$OPT" ;;  # bad long option
-      \?)                              exit 2 ;;  # bad short option (error reported via getopts)
+      h | help) help_flag=true ;;                                                      # it is impossible specify long options with getopts
+      v | verbose) verbose_flag=true ;;                                                # it is impossible specify long options with getopts
+      u | username) needs_arg "$OPTARG"; username="${OPTARG}" ;;                       # it is impossible specify long options with getopts
+      e | email) needs_arg "$OPTARG"; email="${OPTARG}" ;;                             # it is impossible specify long options with getopts
+      n | name) needs_arg "$OPTARG"; name="${OPTARG}" ;;                               # it is impossible specify long options with getopts
+      g | gpg-key-id) needs_arg "$OPTARG"; gpg_key_id="${OPTARG}" ;;                   # it is impossible specify long options with getopts
+      s | ssh-key-passphrase) needs_arg "$OPTARG"; ssh_key_passphrase="${OPTARG}" ;;   # it is impossible specify long options with getopts
+      ??*) die "Illegal option --${OPT}" ;;  # bad long option
+      \?) exit 2 ;;  # bad short option (error reported via getopts)
     esac
   done
 }
 
+#################################################################### CONFIGURATION ##################################################
 
-setParameters "$@";
-# check for help_message
-if $help_flag; then
-  printHelpMessage;
-  exit 0;
-fi
-# try install packages
+####################################################################
+# function to configure git ssh
+####################################################################
+function configure_git_ssh() {
+  if [[ -n "${username}" && -n "${ssh_key_passphrase}" ]]; then
+    echo "Start configuring git ssh.."
+    if [ "${verbose_flag}" = true ]; then
+      eval "$(ssh-agent)" 1>/dev/null;
+      ./git_configure_password.exp "${username}" "${ssh_key_passphrase}" 1>/dev/null;
+      if (( $? != 0 )); then return 3; fi;
+    else
+      eval "$(ssh-agent)"
+      ./git_configure_password.exp "${username}" "${ssh_key_passphrase}"
+      if (( $? != 0 )); then return 3; fi;
+    fi   
+    echo "Git ssh configured successfully!"
+  fi
+}
 
-# git installation
-tryInstall git;
-# ssh configuration
-if [[ -n "$username" && -n "$ssh_key_passphrase" ]]; then
-  echo "Start configuring git ssh"
-  echo "$name"
-  if [ "$verbose_flag" = true ]; then
-    eval "$(ssh-agent)" >/dev/null;
-    ./git_configure_password.exp "$username" "$ssh_key_passphrase" >/dev/null;
+####################################################################
+# function to configure git globals
+####################################################################
+function configure_git_globals() {
+  if [[ -n "${username}" && -n "${email}" && -n "${name}" ]]; then
+    echo "Start configuring git globals.."
+    if [ "${verbose_flag}" = true ]; then
+      sudo -i -u "${username}" git config --global user.email "${email}" && \
+      sudo -i -u "${username}" git config --global user.name "${name}" 1>/dev/null
+      if (( $? != 0 )); then return 3; fi;
+    else
+      sudo -i -u "${username}" git config --global user.email "${email}" && \
+      sudo -i -u "${username}" git config --global user.name "${name}"
+      if (( $? != 0 )); then return 3; fi;
+    fi
+    echo "Git globals configured successfully!"  
+  fi
+}
+
+####################################################################
+# function to configure git gpg
+####################################################################
+function configure_git_gpg() {
+  if [[ -n "${gpg_key_id}" ]]; then
+    echo "Start configuring git gpg..."
+    if [ "${verbose_flag}" = true ]; then
+      sudo -i -u "${username}" git config --global user.signingkey "${gpg_key_id}" && \
+      sudo -i -u "${username}" git config --global commit.gpgsign true 1>/dev/null
+      if (( $? != 0 )); then return 3; fi;
+    else
+      sudo -i -u "${username}" git config --global user.signingkey "${gpg_key_id}" && \
+      sudo -i -u "${username}" git config --global commit.gpgsign true
+      if (( $? != 0 )); then return 3; fi;
+    fi
+    echo "Git gpg configured successfully!"
+  fi
+}
+
+####################################################################
+# function to create postgresql cluster
+####################################################################
+function configure_postgresql_create_db_cluster() {
+  local directory="/var/lib/psql/data"
+  echo "Start creating db cluster..."
+  if [ ! -d "${directory}" ]; then
+    if [ "${verbose_flag}" = true ]; then
+      sudo postgresql-setup --initdb 1>/dev/null
+      if (( $? != 0 )); then return 3; fi;
+    else
+      sudo postgresql-setup --initdb
+      if (( $? != 0 )); then return 3; fi;
+    fi
   else
-    eval "$(ssh-agent)"
-    ./git_configure_password.exp "$username" "$ssh_key_passphrase"
+    echo "Directory ${directory} exists, please, delete before restart script"
+    return 3
   fi
-  if [[ -n "$email" && -n "$name" ]]; then
-    sudo -i -u "$username" git config --global user.email "$email"
-    sudo -i -u "$username" git config --global user.name "$name"
+  echo "Database cluster created successfully!"
+}
+
+####################################################################
+# function to enable and start postgresql service
+####################################################################
+function configure_postgresql_service() {
+  echo "Start enabling and starting postgresql service..."
+  if [ "${verbose_flag}" = true ]; then
+    sudo systemctl enable postgresql.service --now 1>/dev/null
+    if (( $? != 0 )); then return 3; fi;
+  else
+    sudo systemctl enable postgresql.service --now
+    if (( $? != 0 )); then return 3; fi;
   fi
-  echo "Git ssh configured"
-fi
-#gpg configuration
-if [[ -n "$gpg_key_id" ]]; then
-  # gpg_key=gpg --armor --export "$gpg_key_id"
-  echo "Start configuring git gpg"
-  sudo -i -u "$username" git config --global user.signingkey "$gpg_key_id"
-  sudo -i -u "$username" git config --global commit.gpgsign true
-  echo "Git gpg configured"
-fi
+  # test service
+  if systemctl is-active --quiet postgresql; then
+    echo "Postgresql service is active!"
+  else
+    (exit 3) && exit_if_error $? "Postgresql service is not active"
+  fi
+}
 
-tryInstall java-1.8.0-openjdk;
-tryInstall maven;
-tryInstall postgresql-server;
-# postgresql configuration
-echo "Start configuring postgresql"
-sudo postgresql-setup --initdb
-sudo systemctl enable postgresql.service
-sudo systemctl start postgresql.service
+####################################################################
+# function to create user and database
+####################################################################
+function configure_postgresql_user() {
+  echo "Start creating user and database for postgresql..."
+  if [ "${verbose_flag}" = true ]; then
+    sudo -i -u postgres createuser "${username}" --createdb && \
+    sudo -i -u postgres psql -c "create database ${username} with owner ${username};" 1>/dev/null
+    if (( $? != 0 )); then return 3; fi;
+  else
+    sudo -i -u postgres createuser "${username}" --createdb && \
+    sudo -i -u postgres psql -c "create database ${username} with owner ${username};"
+    if (( $? != 0 )); then return 3; fi;
+  fi
+  echo "User and database for postgresql created successfully!"
+}
 
-sudo -i -u postgres createuser "${username}" --createdb
-sudo -i -u postgres psql -c "create database ${username} with owner ${username};"
-echo "Postgresql configured"
+#################################################################### SCRIPT RUN ####################################################################
+
+
+parse_parameters "$@" || exit_if_error $? "Can't parse command line arguments"
+if "${help_flag}"; then print_help_message; exit 0; fi;
+
+try_install git || exit_if_error $? "Can't install git";
+try_install java-1.8.0-openjdk || exit_if_error $? "Can't install java";
+try_install maven || exit_if_error $? "Can't install maven";
+try_install postgresql-server || exit_if_error $? "Can't install postgresql";
+
+configure_git_ssh || exit_if_error $? "Can't configure git ssh";
+configure_git_globals || exit_if_error $? "Can't configure git globals";
+configure_git_gpg || exit_if_error $? "Can't configure git gpg";
+
+configure_postgresql_create_db_cluster || exit_if_error $? "Can't create postgresql db cluster";
+configure_postgresql_service || exit_if_error $? "Can't start postgresql service";
+configure_postgresql_user || exit_if_error $? "Can't configure postgresql user";
+
+echo "Complete!"
+
+
+
+
+
+
+
+
+
