@@ -72,7 +72,7 @@ function try_install() {
   else
     echo "$* is not installed"
     echo "installing $*..."
-    if [ "$verbose_flag" = true ]; then
+    if [ "$verbose_flag" = false ]; then
       sudo yum -y install "$@" 1>/dev/null 2>/dev/null;
     else
       sudo yum -y install "$@"
@@ -129,14 +129,14 @@ function parse_parameters() {
 ####################################################################
 function configure_git_ssh() {
   if [[ -n "${username}" && -n "${ssh_key_passphrase}" ]]; then
-    echo "Start configuring git ssh.."
-    if [ "${verbose_flag}" = true ]; then
-      eval "$(ssh-agent)" 1>/dev/null;
-      ./git_configure_password.exp "${username}" "${ssh_key_passphrase}" 1>/dev/null;
+    echo "Start configuring git ssh..."
+    if [ "${verbose_flag}" = false ]; then
+      command_string="eval \$(ssh-agent) && expect git_configure_password.exp ${username} ${ssh_key_passphrase}"
+      sudo -i -u ${username} bash -c "${command_string}" 1>/dev/null
       if (( $? != 0 )); then return 3; fi;
     else
-      eval "$(ssh-agent)"
-      ./git_configure_password.exp "${username}" "${ssh_key_passphrase}"
+      command_string="eval \$(ssh-agent) && expect git_configure_password.exp ${username} ${ssh_key_passphrase}"
+      sudo -i -u ${username} bash -c "${command_string}"
       if (( $? != 0 )); then return 3; fi;
     fi   
     echo "Git ssh configured successfully!"
@@ -149,7 +149,7 @@ function configure_git_ssh() {
 function configure_git_globals() {
   if [[ -n "${username}" && -n "${email}" && -n "${name}" ]]; then
     echo "Start configuring git globals.."
-    if [ "${verbose_flag}" = true ]; then
+    if [ "${verbose_flag}" = false ]; then
       sudo -i -u "${username}" git config --global user.email "${email}" && \
       sudo -i -u "${username}" git config --global user.name "${name}" 1>/dev/null
       if (( $? != 0 )); then return 3; fi;
@@ -168,7 +168,7 @@ function configure_git_globals() {
 function configure_git_gpg() {
   if [[ -n "${gpg_key_id}" ]]; then
     echo "Start configuring git gpg..."
-    if [ "${verbose_flag}" = true ]; then
+    if [ "${verbose_flag}" = false ]; then
       sudo -i -u "${username}" git config --global user.signingkey "${gpg_key_id}" && \
       sudo -i -u "${username}" git config --global commit.gpgsign true 1>/dev/null
       if (( $? != 0 )); then return 3; fi;
@@ -188,7 +188,7 @@ function configure_postgresql_create_db_cluster() {
   local directory="/var/lib/pgsql/data"
   echo "Start creating db cluster..."
   if [ ! "$(ls -A ${directory})" ]; then
-    if [ "${verbose_flag}" = true ]; then
+    if [ "${verbose_flag}" = false ]; then
       sudo postgresql-setup --initdb 1>/dev/null
       if (( $? != 0 )); then return 3; fi;
     else
@@ -207,7 +207,7 @@ function configure_postgresql_create_db_cluster() {
 ####################################################################
 function configure_postgresql_service() {
   echo "Start enabling and starting postgresql service..."
-  if [ "${verbose_flag}" = true ]; then
+  if [ "${verbose_flag}" = false ]; then
     sudo systemctl enable postgresql.service --now 1>/dev/null
     if (( $? != 0 )); then return 3; fi;
   else
@@ -227,7 +227,7 @@ function configure_postgresql_service() {
 ####################################################################
 function configure_postgresql_user() {
   echo "Start creating user and database for postgresql..."
-  if [ "${verbose_flag}" = true ]; then
+  if [ "${verbose_flag}" = false ]; then
     sudo -i -u postgres createuser "${username}" --createdb && \
     sudo -i -u postgres psql -c "create database ${username} with owner ${username};" 1>/dev/null
     if (( $? != 0 )); then return 3; fi;
