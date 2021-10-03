@@ -130,12 +130,12 @@ function parse_parameters() {
 function configure_git_ssh() {
   if [[ -n "${username}" && -n "${ssh_key_passphrase}" ]]; then
     echo "Start configuring git ssh..."
+    command_string="eval \$(ssh-agent); export SSH_AUTH_SOCK=${SSH_AUTH_SOCK}; \
+    export SSH_AGENT_PID=${SSH_AGENT_PID}; expect git_configure_password.exp ${username} ${ssh_key_passphrase}"
     if [ "${verbose_flag}" = false ]; then
-      command_string="eval \$(ssh-agent) && expect git_configure_password.exp ${username} ${ssh_key_passphrase}"
       sudo -i -u ${username} bash -c "${command_string}" 1>/dev/null
       if (( $? != 0 )); then return 3; fi;
     else
-      command_string="eval \$(ssh-agent) && expect git_configure_password.exp ${username} ${ssh_key_passphrase}"
       sudo -i -u ${username} bash -c "${command_string}"
       if (( $? != 0 )); then return 3; fi;
     fi   
