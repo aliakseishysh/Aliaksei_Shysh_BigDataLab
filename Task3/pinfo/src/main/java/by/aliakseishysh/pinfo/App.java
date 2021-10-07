@@ -1,29 +1,42 @@
 package by.aliakseishysh.pinfo;
 
-import by.aliakseishysh.pinfo.controller.Controller;
-import by.aliakseishysh.pinfo.controller.PropertiesParser;
-import by.aliakseishysh.pinfo.controller.command.Argument;
-import by.aliakseishysh.pinfo.controller.command.Command;
-import by.aliakseishysh.pinfo.controller.command.CommandDefiner;
+import by.aliakseishysh.pinfo.command.PoliceApi;
+import by.aliakseishysh.pinfo.util.CsvReader;
+import by.aliakseishysh.pinfo.util.DataDownloader;
+import by.aliakseishysh.pinfo.util.PropertiesParser;
+import by.aliakseishysh.pinfo.command.Argument;
+import by.aliakseishysh.pinfo.command.Command;
+import by.aliakseishysh.pinfo.command.CommandDefiner;
+import io.github.bucket4j.*;
+import org.apache.http.client.utils.URIBuilder;
 
-import java.util.Properties;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.time.Duration;
+import java.util.*;
+import java.util.concurrent.*;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
 
 /**
  * Main class
  */
 public class App {
 
-
-
-    public static void main(String... args) {
+    public static void main(String... args) throws InterruptedException {
         String[] test = new String[3];
-        test[0] = "-Dcommand=test1";
-        test[1] = "-Dplace=test2";
-        test[2] = "-Ddate=test3";
+        test[0] = "-Dcommand=all-crime";
+        test[1] = "-Dfile_path=C:\\Data\\Java\\Workspace\\epam_lab\\Task3\\LondonStations.csv";
+        test[2] = "-Ddate=2021-01";
 
-        Controller.processRequest(args);
-        // 1) узнать какая команда была передана
-        // 2) узнать какие аргументы были переданы
-        // 3) передать в команду аргументы и выполнить её
+        // TODO part 1
+        Properties properties = PropertiesParser.parseOptions(test);
+        Command command = CommandDefiner.defineCommand(properties.getProperty(Argument.COMMAND.name().toLowerCase()));
+        command.execute(properties);
+        //---------------------------------------
     }
+
+
+
+
 }

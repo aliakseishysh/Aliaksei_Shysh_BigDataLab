@@ -1,4 +1,4 @@
-package by.aliakseishysh.pinfo.model.util;
+package by.aliakseishysh.pinfo.util;
 
 import com.opencsv.CSVReader;
 import com.opencsv.exceptions.CsvException;
@@ -12,6 +12,7 @@ public class CsvReader {
 
     public static List<String[]> readLines(String filePath) {
         try (CSVReader reader = new CSVReader(new FileReader(filePath))) {
+            reader.skip(1);
             List<String[]> lines = reader.readAll();
             return lines;
         } catch (FileNotFoundException e) {

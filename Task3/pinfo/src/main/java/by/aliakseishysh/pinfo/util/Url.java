@@ -1,6 +1,5 @@
-package by.aliakseishysh.pinfo.model.util;
+package by.aliakseishysh.pinfo.util;
 
-import java.util.HashMap;
 import java.util.Map;
 
 public class Url {

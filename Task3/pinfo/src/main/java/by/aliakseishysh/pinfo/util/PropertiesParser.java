@@ -1,4 +1,4 @@
-package by.aliakseishysh.pinfo.controller;
+package by.aliakseishysh.pinfo.util;
 
 
 import org.apache.commons.cli.*;

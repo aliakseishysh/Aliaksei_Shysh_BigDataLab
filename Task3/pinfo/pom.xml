@@ -41,5 +41,15 @@
             <artifactId>opencsv</artifactId>
             <version>5.5.2</version>
         </dependency>
+        <dependency>
+            <groupId>org.apache.httpcomponents</groupId>
+            <artifactId>httpclient</artifactId>
+            <version>4.5.13</version>
+        </dependency>
+        <dependency>
+            <groupId>com.github.vladimir-bukhtoyarov</groupId>
+            <artifactId>bucket4j-core</artifactId>
+            <version>6.3.0</version>
+        </dependency>
     </dependencies>
 </project>

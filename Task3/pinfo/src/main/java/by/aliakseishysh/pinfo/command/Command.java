@@ -1,4 +1,4 @@
-package by.aliakseishysh.pinfo.controller.command;
+package by.aliakseishysh.pinfo.command;
 
 import java.util.Properties;
 

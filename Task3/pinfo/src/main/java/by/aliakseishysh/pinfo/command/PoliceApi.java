@@ -1,4 +1,4 @@
-package by.aliakseishysh.pinfo.controller.command;
+package by.aliakseishysh.pinfo.command;
 
 public enum PoliceApi {
     ALL_CRIME("https://data.police.uk/api/crimes-street/all-crime");
