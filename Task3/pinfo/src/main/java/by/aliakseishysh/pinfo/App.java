@@ -1,6 +1,7 @@
 package by.aliakseishysh.pinfo;
 
 import by.aliakseishysh.pinfo.command.PoliceApi;
+import by.aliakseishysh.pinfo.database.DataSource;
 import by.aliakseishysh.pinfo.util.CsvReader;
 import by.aliakseishysh.pinfo.util.DataDownloader;
 import by.aliakseishysh.pinfo.util.PropertiesParser;
@@ -24,13 +25,8 @@ import java.util.stream.Collectors;
 public class App {
 
     public static void main(String... args) throws InterruptedException {
-        String[] test = new String[3];
-        test[0] = "-Dcommand=all-crime";
-        test[1] = "-Dfile_path=C:\\Data\\Java\\Workspace\\epam_lab\\Task3\\LondonStations.csv";
-        test[2] = "-Ddate=2021-01";
-
         // TODO part 1
-        Properties properties = PropertiesParser.parseOptions(test);
+        Properties properties = PropertiesParser.parseOptions(args);
         Command command = CommandDefiner.defineCommand(properties.getProperty(Argument.COMMAND.name().toLowerCase()));
         command.execute(properties);
         //---------------------------------------
