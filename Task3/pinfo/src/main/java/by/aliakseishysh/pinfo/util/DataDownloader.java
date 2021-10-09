@@ -1,6 +1,5 @@
 package by.aliakseishysh.pinfo.util;
 
-
 import io.github.bucket4j.Bandwidth;
 import io.github.bucket4j.Bucket;
 import io.github.bucket4j.Bucket4j;
@@ -12,26 +11,23 @@ import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
+import java.io.*;
 import java.time.Duration;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Queue;
+import java.util.*;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
+
 public class DataDownloader {
 
-    private static volatile AtomicInteger index = new AtomicInteger(0);
+    private final AtomicInteger index = new AtomicInteger(0);
+
     // TODO replace with slf4j
-    public static List<String> downloadAll(Queue<String> requestUris) throws InterruptedException {
+    public List<String> downloadAll(Queue<String> requestUris) {
         BlockingQueue<String> uris = new LinkedBlockingQueue<>(requestUris);
         List<String> responses = Collections.synchronizedList(new ArrayList<>());
-        int overdraft = 7;
+        int overdraft = 4;
         ExecutorService executorService = Executors.newFixedThreadPool(overdraft);
         CompletionService completionService = new ExecutorCompletionService(executorService);
         Refill refill = Refill.greedy(overdraft, Duration.ofSeconds(1));
@@ -41,20 +37,55 @@ public class DataDownloader {
         int futuresSize = 0;
         while(!uris.isEmpty()) {
             if (futuresSize == overdraft) {
-                completionService.take();
+                try {
+                    completionService.take();
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
                 futuresSize--;
             }
-            bucket.asScheduler().consume(1);
+            try {
+                bucket.asScheduler().consume(1);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
             if (!uris.isEmpty()) {
                 completionService.submit(new Callable() {
                     @Override
                     public Object call() {
                         try {
                             int b = index.addAndGet(1);
-                            System.out.println("Started: " + b + ", size: " + uris.size());
-                            String temp = DataDownloader.downloadData(uris.take());
-                            System.out.println("Downloaded " + b + " : " + temp.substring(0, 100));
-                            responses.add(temp);
+                            System.out.println("Started: " + b + ", remaining: " + uris.size());
+                            String url = uris.take();
+                            String result;
+                            try (CloseableHttpClient httpclient = HttpClients.createDefault()) {
+                                HttpGet httpGet = new HttpGet(url);
+                                try (CloseableHttpResponse response = httpclient.execute(httpGet)) {
+                                    HttpEntity entity1 = response.getEntity();
+
+                                    switch (response.getStatusLine().getStatusCode()) {
+                                        case 200:
+                                            result = new BufferedReader(new InputStreamReader(entity1.getContent()))
+                                                    .lines().collect(Collectors.joining());
+                                            System.out.println("200: Downloaded " + b);
+                                            responses.add(result);
+                                            break;
+                                        case 429:
+                                            System.out.println(response.getStatusLine() + ": Redownloading " + b);
+                                            uris.put(url);
+                                            call();
+                                            break;
+                                        default:
+                                            System.out.println(response.getStatusLine() + ": Canceling " + b);
+                                            break;
+                                    }
+                                    EntityUtils.consume(entity1);
+                                }
+                            } catch (IOException e) {
+                                throw new UnsupportedOperationException(); // TODO handle exception
+                            }
+
+
                         } catch (InterruptedException e) {
                             // TODO handle thread interruption
                         }
@@ -67,26 +98,14 @@ public class DataDownloader {
             }
 
         }
-        executorService.shutdown();
-        executorService.awaitTermination(100, TimeUnit.SECONDS);
-        return responses;
-    }
-
-    private static String downloadData(String url) {
-        try (CloseableHttpClient httpclient = HttpClients.createDefault()) {
-            HttpGet httpGet = new HttpGet(url);
-            try (CloseableHttpResponse response1 = httpclient.execute(httpGet)) {
-                HttpEntity entity1 = response1.getEntity();
-                // System.out.println(response1.getStatusLine().getStatusCode() + " " + response1.getStatusLine().getReasonPhrase());
-                // do something useful with the response body
-                // and ensure it is fully consumed
-                String result = new BufferedReader(new InputStreamReader(entity1.getContent())).lines().collect(Collectors.joining());
-                EntityUtils.consume(entity1);
-                return result;
-            }
-        } catch (IOException e) {
-            throw new UnsupportedOperationException(); // TODO handle exception
+        try {
+            executorService.shutdown();
+            executorService.awaitTermination(100, TimeUnit.SECONDS);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
         }
+        System.out.println("Downloaded: " + responses.size() + "; Requested: " + requestUris.size());
+        return responses;
     }
 
 }

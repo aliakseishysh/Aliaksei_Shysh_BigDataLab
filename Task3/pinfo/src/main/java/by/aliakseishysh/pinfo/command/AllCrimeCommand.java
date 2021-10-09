@@ -2,32 +2,19 @@ package by.aliakseishysh.pinfo.command;
 
 import by.aliakseishysh.pinfo.util.CsvReader;
 import by.aliakseishysh.pinfo.util.DataDownloader;
-import by.aliakseishysh.pinfo.util.Url;
-import io.github.bucket4j.Bandwidth;
-import io.github.bucket4j.Bucket;
-import io.github.bucket4j.Bucket4j;
 import org.apache.http.client.utils.URIBuilder;
 
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.time.Duration;
 import java.util.*;
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.LinkedBlockingDeque;
-import java.util.concurrent.LinkedBlockingQueue;
 
 public class AllCrimeCommand implements Command {
     public void execute(Properties properties) {
-        List<String> responses = Collections.synchronizedList(new ArrayList<>());
         String coordinatesPath = properties.getProperty(Argument.FILE_PATH.name().toLowerCase());
         String date = properties.getProperty(Argument.DATE.name().toLowerCase());
         if (coordinatesPath != null && date != null) {
-            try {
-                DataDownloader.downloadAll(createRequests(coordinatesPath, date));
-            } catch (InterruptedException e) {
-                e.printStackTrace(); // TODO handle exception
-            }
-            responses.forEach((x) -> System.out.println(x.substring(1,100)));
+            List<String> responses = new DataDownloader().downloadAll(createRequests(coordinatesPath, date));
+            responses.forEach((x) -> System.out.println(x.substring(1, 100)));
 
 
         } else {
