@@ -1,9 +1,14 @@
 package by.aliakseishysh.pinfo.command;
 
+import by.aliakseishysh.pinfo.database.dao.PoliceApiDao;
+import by.aliakseishysh.pinfo.database.dao.impl.PoliceApiDaoImpl;
+import by.aliakseishysh.pinfo.entity.ResponseObject;
 import by.aliakseishysh.pinfo.util.CsvReader;
 import by.aliakseishysh.pinfo.util.DataDownloader;
+import by.aliakseishysh.pinfo.util.ResponseParser;
 import org.apache.http.client.utils.URIBuilder;
 
+import javax.xml.ws.Response;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.*;
@@ -14,7 +19,14 @@ public class AllCrimeCommand implements Command {
         String date = properties.getProperty(Argument.DATE.name().toLowerCase());
         if (coordinatesPath != null && date != null) {
             List<String> responses = new DataDownloader().downloadAll(createRequests(coordinatesPath, date));
-            responses.forEach((x) -> System.out.println(x.substring(1, 100)));
+            // TODO implement
+            List<ResponseObject> responseObjects = new ResponseParser().parse(responses.get(0));
+
+            PoliceApiDao policeDao = PoliceApiDaoImpl.getInstance();
+            System.out.println("RESPONSE OBJECT " + responseObjects.get(0));
+            policeDao.addNewResponseObject(responseObjects.get(0));
+
+
 
 
         } else {

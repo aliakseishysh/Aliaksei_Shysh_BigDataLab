@@ -2,8 +2,6 @@
 
 ############################ GLOBALS ###########################################
 
-DATABASE_NAME='task_3'
-
 API_NAME=''
 DATE=''
 FILE_PATH=''
@@ -74,18 +72,17 @@ function file_path_relative_to_absolute() {
 # function to check if database exists
 ####################################################################
 function test_if_database_exists() {
-  psql -lqt | cut -d'|' -f 1 | grep -qw ${DATABASE_NAME}
+  psql -lqt | cut -d'|' -f 1 | grep -qw "$1"
 }
 
 function try_create_database() {
-  printf "Trying to create database..." >&1
-  psql -f ./sql/DatabaseCreation.sql >&3
-  if $?; then
-    printf "Database created successfully!" >&1
-  else
-    return 1
-  fi
+    if (psql -f ./sql/DatabaseCreation.sql) >&3; then
+      printf "Database created successfully!" >&1
+    else
+      return 1
+    fi
 }
+
 
 
 
@@ -130,11 +127,9 @@ parse_parameters "$@" || exit_if_error $? "Can't parse command line arguments"
 if "${HELP_FLAG}"; then print_help_message; exit 0; fi;
 redirect_output || exit_if_error $? "Can't redirect output"
 
-file_path_relative_to_absolute || exit_if_error $? "File doesn't exist"
+file_path_relative_to_absolute || exit_if_error $? "File with stations doesn't exist"
 
-if ! test_if_database_exists; then
-  try_create_database || exit_if_error $? "Can't create database ${DATABASE_NAME}: Already exists"
-fi
+try_create_database || exit_if_error $? "Can't create database ${DATABASE_NAME}"
 
 if "${MAVEN_FLAG}"; then package_java_app; fi;
 
