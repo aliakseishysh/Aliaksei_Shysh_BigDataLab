@@ -2,61 +2,78 @@ package by.aliakseishysh.pinfo.command;
 
 import by.aliakseishysh.pinfo.database.dao.PoliceApiDao;
 import by.aliakseishysh.pinfo.database.dao.impl.PoliceApiDaoImpl;
-import by.aliakseishysh.pinfo.entity.ResponseObject;
-import by.aliakseishysh.pinfo.util.CsvReader;
-import by.aliakseishysh.pinfo.util.DataDownloader;
-import by.aliakseishysh.pinfo.util.ResponseParser;
-import org.apache.http.client.utils.URIBuilder;
+import by.aliakseishysh.pinfo.entity.AllCrimeResponseObject;
+import by.aliakseishysh.pinfo.exception.CommandException;
+import by.aliakseishysh.pinfo.exception.ReadingException;
+import by.aliakseishysh.pinfo.util.*;
+import org.apache.http.NameValuePair;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import javax.xml.ws.Response;
-import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.*;
 
+
+/**
+ * Command for downloading data from all-crime api
+ */
 public class AllCrimeCommand implements Command {
-    public void execute(Properties properties) {
-        String coordinatesPath = properties.getProperty(Argument.FILE_PATH.name().toLowerCase());
-        String date = properties.getProperty(Argument.DATE.name().toLowerCase());
-        if (coordinatesPath != null && date != null) {
-            List<String> responses = new DataDownloader().downloadAll(createRequests(coordinatesPath, date));
-            // TODO implement
-            List<ResponseObject> responseObjects = new ResponseParser().parse(responses.get(0));
 
-            PoliceApiDao policeDao = PoliceApiDaoImpl.getInstance();
-            System.out.println("RESPONSE OBJECT " + responseObjects.get(0));
-            policeDao.addNewResponseObject(responseObjects.get(0));
+    private static final Logger LOGGER = LoggerFactory.getLogger(AllCrimeCommand.class);
 
+    // TODO add option "save to file"
 
-
-
-        } else {
-            // TODO handle parameter input error
+    /**
+     * Downloading and processing data from api
+     *
+     * @param properties command line arguments
+     * @throws CommandException if method can't execute the command
+     */
+    public void execute(Properties properties) throws CommandException {
+        try {
+            String coordinatesPath = properties.getProperty(Argument.FILE_PATH.name().toLowerCase());
+            String date = properties.getProperty(Argument.DATE.name().toLowerCase());
+            if (coordinatesPath != null && date != null) {
+                List<String> responses = new DataDownloader().downloadAll(createRequests(coordinatesPath, date));
+                ResponseParser parser = new ResponseParser();
+                List<AllCrimeResponseObject> allCrimeResponseObjects = new ArrayList<>();
+                responses.forEach((rsp) -> allCrimeResponseObjects.addAll(parser.parse(rsp)));
+                PoliceApiDao policeDao = PoliceApiDaoImpl.getInstance();
+                allCrimeResponseObjects.forEach((responseObject) -> policeDao.addNewAllCrimeResponseObject(responseObject));
+            } else {
+                LOGGER.error("Can't execute the command: properties missing");
+                throw new CommandException("Can't execute the command: properties missing");
+            }
+        } catch (ReadingException e) {
+            LOGGER.error("Can't execute the command", e);
+            throw new CommandException("Can't execute the command", e);
         }
+
     }
 
-    private Queue<String> createRequests(String coordinatesPath, String date) {
-        String dateName = Argument.DATE.name().toLowerCase();
-        String latName = Argument.LAT.name().toLowerCase();
-        String lngName = Argument.LNG.name().toLowerCase();
+    /**
+     * Creates query uris for current command
+     *
+     * @param coordinatesPath path to file with coordinates
+     * @param date            download data on this date
+     * @return queue with uris for current command
+     * @throws ReadingException if method can't read file with coordinates
+     */
+    private Queue<String> createRequests(String coordinatesPath, String date) throws ReadingException {
         List<String[]> places = CsvReader.readLines(coordinatesPath);
         Queue<String> requestUris = new LinkedList<>();
-        for (String[] line : places) {
-            String csvName = line[0];
-            String csvLng = line[1];
-            String csvLat = line[2];
-
-            try {
-                URI uri = new URIBuilder(PoliceApi.ALL_CRIME.getApi())
-                        .addParameter(dateName, date)
-                        .addParameter(latName, csvLat)
-                        .addParameter(lngName, csvLng)
-                        .build();
-                requestUris.add(uri.toString());
-            } catch (URISyntaxException e) {
-                throw new UnsupportedOperationException(); // TODO handle exception
-            }
-        }
+        places.forEach((place) -> {
+            String csvLng = place[1];
+            String csvLat = place[2];
+            List<NameValuePair> pairs = NameValuePairBuilder.newBuilder()
+                    .addPair(Argument.DATE.name().toLowerCase(), date)
+                    .addPair(Argument.LAT.name().toLowerCase(), csvLat)
+                    .addPair(Argument.LNG.name().toLowerCase(), csvLng)
+                    .build();
+            String uri = UriBuilder.buildUri(PoliceApi.ALL_CRIME, pairs);
+            requestUris.add(uri);
+        });
         return requestUris;
     }
+
 
 }

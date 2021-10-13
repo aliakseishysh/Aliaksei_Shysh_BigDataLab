@@ -1,5 +1,8 @@
 package by.aliakseishysh.pinfo.database;
 
+/**
+ * Represents database column names
+ */
 public class DatabaseColumn {
 
     // streets

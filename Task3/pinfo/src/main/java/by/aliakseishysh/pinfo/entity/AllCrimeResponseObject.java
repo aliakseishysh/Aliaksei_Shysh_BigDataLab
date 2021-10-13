@@ -1,18 +1,21 @@
 package by.aliakseishysh.pinfo.entity;
 
-public class ResponseObject {
+/**
+ * Represents json response object from all-crime api
+ */
+public class AllCrimeResponseObject {
 
     private String category;
     private String persistentId;
     private String month;
-    private Location location;
+    private final Location location;
     private String context;
     private long id;
     private String locationType;
     private String locationSubtype;
-    private OutcomeStatus outcomeStatus;
+    private final OutcomeStatus outcomeStatus;
 
-    private ResponseObject() {
+    private AllCrimeResponseObject() {
         this.location = new Location();
         this.outcomeStatus = new OutcomeStatus();
     }
@@ -69,9 +72,9 @@ public class ResponseObject {
         return sb.toString();
     }
 
-    public class Location {
+    public static class Location {
         private String latitude;
-        private Street street;
+        private final Street street;
         private String longtitude;
 
         private Location() {
@@ -81,9 +84,11 @@ public class ResponseObject {
         public String getLatitude() {
             return latitude;
         }
+
         public Street getStreet() {
             return street;
         }
+
         public String getLongtitude() {
             return longtitude;
         }
@@ -98,13 +103,14 @@ public class ResponseObject {
             return sb.toString();
         }
 
-        public class Street {
+        public static class Street {
             private long id;
             private String name;
 
             public long getId() {
                 return id;
             }
+
             public String getName() {
                 return name;
             }
@@ -121,13 +127,14 @@ public class ResponseObject {
         }
     }
 
-    public class OutcomeStatus {
+    public static class OutcomeStatus {
         private String category;
         private String date;
 
         public String getCategory() {
             return category;
         }
+
         public String getDate() {
             return date;
         }
@@ -143,66 +150,80 @@ public class ResponseObject {
     }
 
     public static Builder newBuilder() {
-        return new ResponseObject().new Builder();
+        return new AllCrimeResponseObject().new Builder();
     }
 
     public class Builder {
         private Builder() {
         }
+
         public Builder setCategory(String category) {
-            ResponseObject.this.category = category;
+            AllCrimeResponseObject.this.category = category;
             return this;
         }
+
         public Builder setPersistentId(String persistentId) {
-            ResponseObject.this.persistentId = persistentId;
+            AllCrimeResponseObject.this.persistentId = persistentId;
             return this;
         }
+
         public Builder setMonth(String month) {
-            ResponseObject.this.month = month;
+            AllCrimeResponseObject.this.month = month;
             return this;
         }
+
         public Builder setLocationLatitude(String latitude) {
-            ResponseObject.this.location.latitude = latitude;
+            AllCrimeResponseObject.this.location.latitude = latitude;
             return this;
         }
+
         public Builder setLocationStreetId(long id) {
-            ResponseObject.this.location.street.id = id;
+            AllCrimeResponseObject.this.location.street.id = id;
             return this;
         }
+
         public Builder setLocationStreetName(String name) {
-            ResponseObject.this.location.street.name = name;
+            AllCrimeResponseObject.this.location.street.name = name;
             return this;
         }
+
         public Builder setLocationLongtitude(String longtitude) {
-            ResponseObject.this.location.longtitude = longtitude;
+            AllCrimeResponseObject.this.location.longtitude = longtitude;
             return this;
         }
+
         public Builder setContext(String context) {
-            ResponseObject.this.context = context;
+            AllCrimeResponseObject.this.context = context;
             return this;
         }
+
         public Builder setId(long id) {
-            ResponseObject.this.id = id;
+            AllCrimeResponseObject.this.id = id;
             return this;
         }
+
         public Builder setLocationType(String locationType) {
-            ResponseObject.this.locationType = locationType;
+            AllCrimeResponseObject.this.locationType = locationType;
             return this;
         }
+
         public Builder setLocationSubtype(String locationSubtype) {
-            ResponseObject.this.locationSubtype = locationSubtype;
+            AllCrimeResponseObject.this.locationSubtype = locationSubtype;
             return this;
         }
+
         public Builder setOutcomeStatusCategory(String category) {
-            ResponseObject.this.outcomeStatus.category = category;
+            AllCrimeResponseObject.this.outcomeStatus.category = category;
             return this;
         }
+
         public Builder setOutcomeStatusDate(String date) {
-            ResponseObject.this.outcomeStatus.date = date;
+            AllCrimeResponseObject.this.outcomeStatus.date = date;
             return this;
         }
-        public ResponseObject build() {
-            return ResponseObject.this;
+
+        public AllCrimeResponseObject build() {
+            return AllCrimeResponseObject.this;
         }
 
     }

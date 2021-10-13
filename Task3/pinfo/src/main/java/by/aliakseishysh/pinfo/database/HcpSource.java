@@ -2,10 +2,17 @@ package by.aliakseishysh.pinfo.database;
 
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.util.*;
 
+/**
+ * Initializes HikariCP
+ */
 public class HcpSource {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(HcpSource.class);
     private static HikariDataSource hikariDataSource;
 
     static {
@@ -18,15 +25,17 @@ public class HcpSource {
 
             HikariConfig config = new HikariConfig(properties);
             hikariDataSource = new HikariDataSource(config);
-        } catch (MissingResourceException e) {
-            throw new ExceptionInInitializerError(e.getMessage()); //TODO handle exception
+        } catch (RuntimeException e) {
+            LOGGER.error("Can't initialize HikariCP", e);
+            throw new ExceptionInInitializerError("Can't initialize HikariCP");
         }
     }
 
-    private HcpSource(){}
+    private HcpSource() {
+    }
 
     public static HikariDataSource getSource() {
-        return  hikariDataSource;
+        return hikariDataSource;
     }
 
 }

@@ -1,13 +1,23 @@
 package by.aliakseishysh.pinfo.util;
 
-
+import by.aliakseishysh.pinfo.exception.CliPropertiesException;
 import org.apache.commons.cli.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.Properties;
 
 public class PropertiesParser {
 
-    public static Properties parseOptions(String... args) {
+    private static final Logger logger = LoggerFactory.getLogger(PropertiesParser.class);
+
+    /**
+     * Parses command line arguments
+     *
+     * @param args command line arguments
+     * @return properties with command line arguments
+     */
+    public static Properties parseOptions(String... args) throws CliPropertiesException {
         try {
             final CommandLineParser parser = new DefaultParser();
             final String optionName = "D";
@@ -18,11 +28,18 @@ public class PropertiesParser {
             }
             return properties;
         } catch (ParseException e) {
-            throw new UnsupportedOperationException(); // TODO Handle ParseException
+            logger.error("Can't parse command line arguments", e);
+            throw new CliPropertiesException("Can't parse command line arguments", e);
         }
     }
 
-    private static final Options buildOption(String optionName) {
+    /**
+     * Builds options list
+     *
+     * @param optionName command line option name (e.g. D)
+     * @return list with options settings
+     */
+    private static Options buildOption(String optionName) {
         final Options options = new Options();
         final Option propertyOption = Option.builder()
                 .longOpt(optionName)

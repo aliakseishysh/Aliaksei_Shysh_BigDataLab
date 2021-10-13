@@ -1,5 +1,8 @@
 package by.aliakseishysh.pinfo.command;
 
+/**
+ * Class for defining commands
+ */
 public enum CommandDefiner {
 
     ALL_CRIME("all-crime", new AllCrimeCommand()),
