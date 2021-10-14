@@ -58,18 +58,16 @@ public class AllCrimeResponseObject {
 
     @Override
     public String toString() {
-        final StringBuilder sb = new StringBuilder("ResponseObject{");
-        sb.append("category='").append(category).append('\'');
-        sb.append(", persistentId='").append(persistentId).append('\'');
-        sb.append(", month='").append(month).append('\'');
-        sb.append(", location=").append(location);
-        sb.append(", context='").append(context).append('\'');
-        sb.append(", id=").append(id);
-        sb.append(", locationType='").append(locationType).append('\'');
-        sb.append(", locationSubtype='").append(locationSubtype).append('\'');
-        sb.append(", outcomeStatus=").append(outcomeStatus);
-        sb.append('}');
-        return sb.toString();
+        return "ResponseObject{" + "category='" + category + '\'' +
+                ", persistentId='" + persistentId + '\'' +
+                ", month='" + month + '\'' +
+                ", location=" + location +
+                ", context='" + context + '\'' +
+                ", id=" + id +
+                ", locationType='" + locationType + '\'' +
+                ", locationSubtype='" + locationSubtype + '\'' +
+                ", outcomeStatus=" + outcomeStatus +
+                '}';
     }
 
     public static class Location {
@@ -95,12 +93,10 @@ public class AllCrimeResponseObject {
 
         @Override
         public String toString() {
-            final StringBuilder sb = new StringBuilder("Location{");
-            sb.append("latitude='").append(latitude).append('\'');
-            sb.append(", street=").append(street);
-            sb.append(", longtitude='").append(longtitude).append('\'');
-            sb.append('}');
-            return sb.toString();
+            return "Location{" + "latitude='" + latitude + '\'' +
+                    ", street=" + street +
+                    ", longtitude='" + longtitude + '\'' +
+                    '}';
         }
 
         public static class Street {
@@ -118,11 +114,9 @@ public class AllCrimeResponseObject {
 
             @Override
             public String toString() {
-                final StringBuilder sb = new StringBuilder("Street{");
-                sb.append("id=").append(id);
-                sb.append(", name='").append(name).append('\'');
-                sb.append('}');
-                return sb.toString();
+                return "Street{" + "id=" + id +
+                        ", name='" + name + '\'' +
+                        '}';
             }
         }
     }
@@ -141,11 +135,9 @@ public class AllCrimeResponseObject {
 
         @Override
         public String toString() {
-            final StringBuilder sb = new StringBuilder("OutcomeStatus{");
-            sb.append("category='").append(category).append('\'');
-            sb.append(", date='").append(date).append('\'');
-            sb.append('}');
-            return sb.toString();
+            return "OutcomeStatus{" + "category='" + category + '\'' +
+                    ", date='" + date + '\'' +
+                    '}';
         }
     }
 

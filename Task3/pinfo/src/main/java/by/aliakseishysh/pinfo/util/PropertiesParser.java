@@ -21,7 +21,7 @@ public class PropertiesParser {
         try {
             final CommandLineParser parser = new DefaultParser();
             final String optionName = "D";
-            final CommandLine commandLine = parser.parse(buildOption(optionName), args);
+            final CommandLine commandLine = parser.parse(buildOptions(optionName), args);
             Properties properties = new Properties();
             if (commandLine.hasOption(optionName)) {
                 properties = commandLine.getOptionProperties(optionName);
@@ -39,7 +39,7 @@ public class PropertiesParser {
      * @param optionName command line option name (e.g. D)
      * @return list with options settings
      */
-    private static Options buildOption(String optionName) {
+    private static Options buildOptions(String optionName) {
         final Options options = new Options();
         final Option propertyOption = Option.builder()
                 .longOpt(optionName)

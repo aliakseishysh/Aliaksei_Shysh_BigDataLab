@@ -13,7 +13,7 @@ import java.util.List;
 
 public class ResponseParser {
 
-    private static long index = 0;
+    private static final long index = 0;
 
     /**
      * Parses json string to {@code List<ResponseObject>}

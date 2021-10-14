@@ -34,11 +34,10 @@ public class AllCrimeCommand implements Command {
             String date = properties.getProperty(Argument.DATE.name().toLowerCase());
             if (coordinatesPath != null && date != null) {
                 List<String> responses = new DataDownloader().downloadAll(createRequests(coordinatesPath, date));
-                ResponseParser parser = new ResponseParser();
-                List<AllCrimeResponseObject> allCrimeResponseObjects = new ArrayList<>();
-                responses.forEach((rsp) -> allCrimeResponseObjects.addAll(parser.parse(rsp)));
+                List<AllCrimeResponseObject> allCrimeResponseObjects = new LinkedList<>();
+                responses.forEach((rsp) -> allCrimeResponseObjects.addAll(ResponseParser.parse(rsp)));
                 PoliceApiDao policeDao = PoliceApiDaoImpl.getInstance();
-                allCrimeResponseObjects.forEach((responseObject) -> policeDao.addNewAllCrimeResponseObject(responseObject));
+                allCrimeResponseObjects.forEach(policeDao::addNewAllCrimeResponseObject);
             } else {
                 LOGGER.error("Can't execute the command: properties missing");
                 throw new CommandException("Can't execute the command: properties missing");

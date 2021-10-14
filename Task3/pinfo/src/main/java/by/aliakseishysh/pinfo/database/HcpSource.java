@@ -13,7 +13,7 @@ import java.util.*;
 public class HcpSource {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(HcpSource.class);
-    private static HikariDataSource hikariDataSource;
+    private static final HikariDataSource hikariDataSource;
 
     static {
         try {
