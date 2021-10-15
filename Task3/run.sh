@@ -4,8 +4,7 @@
 
 API_NAME=''
 DATE=''
-START_DATE=''
-END_DATE=''
+MONTH_COUNT=''
 FILE_PATH=''
 SAVE_TO_FILE=''
 
@@ -59,10 +58,8 @@ function parse_parameters() {
       f | file_path) needs_arg "$OPTARG"; FILE_PATH="${OPTARG}" ;;
       d | date) needs_arg "$OPTARG"; DATE="${OPTARG}" ;;
       a | api) needs_arg "$OPTARG"; API_NAME="${OPTARG}" ;;
-      start-date) needs_arg "$OPTARG"; START_DATE="${OPTARG}" ;;
-      end-date) needs_arg "$OPTARG"; END_DATE="${OPTARG}" ;;
+      month-count) needs_arg "$OPTARG"; MONTH_COUNT="${OPTARG}" ;;
       save-to-file) needs_arg "$OPTARG"; SAVE_TO_FILE="${OPTARG}" ;;
-
       ??*) die "Illegal option --${OPT}" ;;                                            # bad long option
       \?) exit 2 ;;                                                                    # bad short option (error reported via getopts)
     esac
@@ -125,6 +122,7 @@ function run_java_app() {
   -Dcommand="${API_NAME}" \
   -Dfile_path="${FILE_PATH}" \
   -Dsave_to_file="${SAVE_TO_FILE}" \
+  -Dmonth_count="${MONTH_COUNT}" \
   -Ddate="${DATE}" >&3
 }
 

@@ -76,8 +76,8 @@ public class PoliceApiDaoImpl implements PoliceApiDao {
         String locationType = (String) allCrimeResponseObject.get(DatabaseColumn.CRIMES_LOCATION_TYPE);
         String locationSubtype = (String) allCrimeResponseObject.get(DatabaseColumn.CRIMES_LOCATION_SUBTYPE);
 
-        List<List<?>> queryParameters = new ArrayList<>(2);
-        List<Object> listParameters = new ArrayList<>(12);
+        List<List<?>> queryParameters = new ArrayList<>();
+        List<Object> listParameters = new ArrayList<>();
         listParameters.add(category);
         listParameters.add(persistentId);
         listParameters.add(month);
@@ -107,8 +107,8 @@ public class PoliceApiDaoImpl implements PoliceApiDao {
     private long addNewStreet(Query query, Map<String, Object> street) {
         long id = (long) street.get(DatabaseColumn.STREETS_ID);
         String name = (String) street.get(DatabaseColumn.STREETS_NAME);
-        List<List<?>> queryParameters = new ArrayList<>(2);
-        List<Object> listParameters = new ArrayList<>(3);
+        List<List<?>> queryParameters = new ArrayList<>();
+        List<Object> listParameters = new ArrayList<>();
         listParameters.add(id);
         listParameters.add(name);
         queryParameters.add(listParameters);
@@ -129,8 +129,8 @@ public class PoliceApiDaoImpl implements PoliceApiDao {
     private long addNewLocation(Query query, Map<String, Object> location, long streetId) {
         String latitude = (String) location.get(DatabaseColumn.LOCATIONS_LATITUDE);
         String longitude = (String) location.get(DatabaseColumn.LOCATIONS_LONGITUDE);
-        List<List<?>> queryParameters = new ArrayList<>(2);
-        List<Object> listParameters = new ArrayList<>(4);
+        List<List<?>> queryParameters = new ArrayList<>();
+        List<Object> listParameters = new ArrayList<>();
         listParameters.add(latitude);
         if (streetId != -1L) {
             listParameters.add(streetId);
@@ -156,8 +156,8 @@ public class PoliceApiDaoImpl implements PoliceApiDao {
     private long addNewOutcome(Query query, Map<String, Object> outcomeStatus) {
         String category = outcomeStatus != null ? (String) outcomeStatus.get(DatabaseColumn.OUTCOMES_CATEGORY) : null;
         Date date = outcomeStatus != null ? (Date) outcomeStatus.get(DatabaseColumn.OUTCOMES_DATE) : null;
-        List<List<?>> queryParameters = new ArrayList<>(2);
-        List<Object> listParameters = new ArrayList<>(3);
+        List<List<?>> queryParameters = new ArrayList<>();
+        List<Object> listParameters = new ArrayList<>();
         listParameters.add(category);
         listParameters.add(date);
         queryParameters.add(listParameters);

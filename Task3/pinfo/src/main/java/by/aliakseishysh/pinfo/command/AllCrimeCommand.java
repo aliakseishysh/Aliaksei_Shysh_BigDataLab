@@ -9,6 +9,7 @@ import by.aliakseishysh.pinfo.exception.FileWritingException;
 import by.aliakseishysh.pinfo.util.CsvReader;
 import by.aliakseishysh.pinfo.util.CsvWriter;
 import by.aliakseishysh.pinfo.util.DataDownloader;
+import by.aliakseishysh.pinfo.util.DateCreator;
 import by.aliakseishysh.pinfo.util.NameValuePairBuilder;
 import by.aliakseishysh.pinfo.util.ResponseParser;
 import by.aliakseishysh.pinfo.util.UriBuilder;
@@ -16,6 +17,7 @@ import org.apache.http.NameValuePair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.text.ParseException;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -44,14 +46,20 @@ public class AllCrimeCommand implements Command {
         try {
             String coordinatesPath = properties.getProperty(Argument.FILE_PATH.name().toLowerCase());
             String date = properties.getProperty(Argument.DATE.name().toLowerCase());
+            // TODO parse int handle
+            String monthCountString = properties.getProperty(Argument.MONTH_COUNT.name().toLowerCase());
+            int monthCount = !monthCountString.equals("") ? Integer.parseInt(monthCountString) : 1;
             String saveToFile = properties.getProperty(Argument.SAVE_TO_FILE.name().toLowerCase());
-            if (coordinatesPath != null && date != null) {
-                List<String> responses = new DataDownloader().downloadAll(createRequests(coordinatesPath, date));
+            if (coordinatesPath != "" && date != "") {
+                List<String> dates = DateCreator.createDates(date, monthCount);
+                Queue<String> requestUris = createRequests(coordinatesPath, dates);
+
+                List<String> responses = new DataDownloader().downloadAll(requestUris);
                 ConcurrentLinkedQueue<Map<String, Object>> allCrimeResponseObjects = new ConcurrentLinkedQueue<>();
                 PoliceApiDao policeDao;
                 AtomicInteger counter = new AtomicInteger(1);
                 AtomicInteger index = new AtomicInteger(1);
-                // TODO rewrite this to achieve abstraction
+
                 long time1 = System.currentTimeMillis();
                 if (saveToFile != null)  {
                     CsvWriter csvWriter = new CsvWriter(saveToFile);
@@ -79,7 +87,7 @@ public class AllCrimeCommand implements Command {
                 LOGGER.error("Can't execute the command: properties missing");
                 throw new CommandException("Can't execute the command: properties missing");
             }
-        } catch (FileReadingException | FileWritingException e) {
+        } catch (FileReadingException | FileWritingException | ParseException e) {
             LOGGER.error("Can't execute the command", e);
             throw new CommandException("Can't execute the command", e);
         }
@@ -90,24 +98,26 @@ public class AllCrimeCommand implements Command {
      * Creates query uris for current command.
      *
      * @param coordinatesPath path to file with coordinates
-     * @param date            download data on this date
+     * @param dates            download data on this dates
      * @return queue with uris for current command
      * @throws FileReadingException if method can't read file with coordinates
      */
-    private Queue<String> createRequests(final String coordinatesPath, final String date) throws FileReadingException {
+    private Queue<String> createRequests(final String coordinatesPath, List<String> dates) throws FileReadingException {
         List<String[]> places = CsvReader.readLines(coordinatesPath);
         Queue<String> requestUris = new LinkedList<>();
-        places.forEach((place) -> {
-            String csvLng = place[1];
-            String csvLat = place[2];
-            List<NameValuePair> pairs = NameValuePairBuilder.newBuilder()
-                    .addPair(Argument.DATE.name().toLowerCase(), date)
-                    .addPair(Argument.LAT.name().toLowerCase(), csvLat)
-                    .addPair(Argument.LNG.name().toLowerCase(), csvLng)
-                    .build();
-            String uri = UriBuilder.buildUri(PoliceApi.ALL_CRIME, pairs);
-            requestUris.add(uri);
+        dates.forEach((date) -> {
+            places.forEach((place) -> {
+                String csvLng = place[1];
+                String csvLat = place[2];
+                List<NameValuePair> pairs = NameValuePairBuilder.newBuilder()
+                        .addPair(Argument.DATE.name().toLowerCase(), date)
+                        .addPair(Argument.LAT.name().toLowerCase(), csvLat)
+                        .addPair(Argument.LNG.name().toLowerCase(), csvLng)
+                        .build();
+                requestUris.add(UriBuilder.buildUri(PoliceApi.ALL_CRIME, pairs));
+            });
         });
+
         return requestUris;
     }
 
