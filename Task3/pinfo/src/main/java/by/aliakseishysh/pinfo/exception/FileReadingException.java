@@ -2,13 +2,13 @@ package by.aliakseishysh.pinfo.exception;
 
 import java.security.PrivilegedActionException;
 
-public class ReadingException extends Exception {
+public class FileReadingException extends Exception {
     /**
      * Constructs a new exception with {@code null} as its detail message.
      * The cause is not initialized, and may subsequently be initialized by a
      * call to {@link #initCause}.
      */
-    public ReadingException() {
+    public FileReadingException() {
         super();
     }
 
@@ -20,7 +20,7 @@ public class ReadingException extends Exception {
      * @param message the detail message. The detail message is saved for
      *                later retrieval by the {@link #getMessage()} method.
      */
-    public ReadingException(String message) {
+    public FileReadingException(String message) {
         super(message);
     }
 
@@ -38,7 +38,7 @@ public class ReadingException extends Exception {
      *                unknown.)
      * @since 1.4
      */
-    public ReadingException(String message, Throwable cause) {
+    public FileReadingException(String message, Throwable cause) {
         super(message, cause);
     }
 
@@ -56,7 +56,7 @@ public class ReadingException extends Exception {
      *              unknown.)
      * @since 1.4
      */
-    public ReadingException(Throwable cause) {
+    public FileReadingException(Throwable cause) {
         super(cause);
     }
 }

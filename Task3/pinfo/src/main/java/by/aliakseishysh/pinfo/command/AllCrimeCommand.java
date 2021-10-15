@@ -4,8 +4,10 @@ import by.aliakseishysh.pinfo.dao.PoliceApiDao;
 import by.aliakseishysh.pinfo.dao.impl.PoliceApiDaoFileImpl;
 import by.aliakseishysh.pinfo.dao.impl.PoliceApiDaoImpl;
 import by.aliakseishysh.pinfo.exception.CommandException;
-import by.aliakseishysh.pinfo.exception.ReadingException;
+import by.aliakseishysh.pinfo.exception.FileReadingException;
+import by.aliakseishysh.pinfo.exception.FileWritingException;
 import by.aliakseishysh.pinfo.util.CsvReader;
+import by.aliakseishysh.pinfo.util.CsvWriter;
 import by.aliakseishysh.pinfo.util.DataDownloader;
 import by.aliakseishysh.pinfo.util.NameValuePairBuilder;
 import by.aliakseishysh.pinfo.util.ResponseParser;
@@ -52,15 +54,15 @@ public class AllCrimeCommand implements Command {
                 // TODO rewrite this to achieve abstraction
                 long time1 = System.currentTimeMillis();
                 if (saveToFile != null)  {
-                    policeDao = PoliceApiDaoFileImpl.getInstance();
-                    policeDao.init(saveToFile);
+                    CsvWriter csvWriter = new CsvWriter(saveToFile);
+                    policeDao = new PoliceApiDaoFileImpl(false, csvWriter);
                 } else {
                     policeDao = PoliceApiDaoImpl.getInstance();
-                    policeDao.init();
                 }
+
                 responses.forEach((rsp) -> allCrimeResponseObjects.addAll(ResponseParser.parse(rsp)));
                 allCrimeResponseObjects.forEach((obj) -> {
-                    policeDao.addNewAllCrimeResponseObject(obj);
+                    policeDao.add(obj);
                     int localIndex = index.get();
                     if (localIndex >= 100) {
                         LOGGER.info(counter.get() + " objects added to database");
@@ -77,7 +79,7 @@ public class AllCrimeCommand implements Command {
                 LOGGER.error("Can't execute the command: properties missing");
                 throw new CommandException("Can't execute the command: properties missing");
             }
-        } catch (ReadingException e) {
+        } catch (FileReadingException | FileWritingException e) {
             LOGGER.error("Can't execute the command", e);
             throw new CommandException("Can't execute the command", e);
         }
@@ -90,9 +92,9 @@ public class AllCrimeCommand implements Command {
      * @param coordinatesPath path to file with coordinates
      * @param date            download data on this date
      * @return queue with uris for current command
-     * @throws ReadingException if method can't read file with coordinates
+     * @throws FileReadingException if method can't read file with coordinates
      */
-    private Queue<String> createRequests(final String coordinatesPath, final String date) throws ReadingException {
+    private Queue<String> createRequests(final String coordinatesPath, final String date) throws FileReadingException {
         List<String[]> places = CsvReader.readLines(coordinatesPath);
         Queue<String> requestUris = new LinkedList<>();
         places.forEach((place) -> {

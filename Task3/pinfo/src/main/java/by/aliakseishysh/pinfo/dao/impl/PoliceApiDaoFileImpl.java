@@ -5,49 +5,42 @@ import by.aliakseishysh.pinfo.dao.PoliceApiDao;
 import by.aliakseishysh.pinfo.util.CsvWriter;
 import by.aliakseishysh.pinfo.util.Mapper;
 
+import java.util.List;
 import java.util.Map;
 
 public class PoliceApiDaoFileImpl  implements PoliceApiDao {
 
+    private boolean isHeaderWritten = false;
+    private CsvWriter csvWriter;
 
-    private static final PoliceApiDao instance = new PoliceApiDaoFileImpl();
-    private static boolean isHeaderWritten = false;
-    private static String filePath = null;
-
-    private PoliceApiDaoFileImpl() {
+    public PoliceApiDaoFileImpl(boolean isHeaderWritten, CsvWriter csvWriter) {
+        this.csvWriter = csvWriter;
+        this.isHeaderWritten = isHeaderWritten;
     }
 
-    public static PoliceApiDao getInstance() { return instance; }
 
 
     /**
      * Adds response object from all-crime api to database
      *
-     * @param allCrimeResponseMap response object parsed from all-crime api
+     * @param crime response object parsed from all-crime api
      * @return true if successfully added, false otherwise
      */
     @Override
-    public boolean addNewAllCrimeResponseObject(Map<String, Object> allCrimeResponseMap) {
-        String[] data;
+    public boolean add(Map<String, Object> crime) {
         if (isHeaderWritten == false) {
-            data = CsvHeader.ALL_CRIME_HEADERS;
+            csvWriter.writeLine(CsvHeader.ALL_CRIME_HEADERS);
             isHeaderWritten = true;
-        } else {
-            data = Mapper.allCrimeResponseMapToStringArray(allCrimeResponseMap);
         }
-        CsvWriter.writeCsvAllCrime(filePath, data);
+        String[] data = Mapper.allCrimeResponseMapToStringArray(crime);
+        csvWriter.writeLine(data);
         return true; // TODO handle
     }
 
     @Override
     public void clear() {
         isHeaderWritten = false;
-        filePath = null;
-    }
-
-    @Override
-    public void init(String... args) {
-        filePath = args[0];
+        csvWriter = null;
     }
 
 }

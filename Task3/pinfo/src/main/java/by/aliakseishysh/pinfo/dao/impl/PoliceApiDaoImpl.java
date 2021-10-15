@@ -27,17 +27,17 @@ public class PoliceApiDaoImpl implements PoliceApiDao {
     /**
      * Adds {@code allCrimeResponseObject} to database (queries runs as transaction)
      *
-     * @param allCrimeResponseMap response object parsed from all-crime api
+     * @param crime response object parsed from all-crime api
      * @return true if crime added, false otherwise
      */
     @Override
-    public boolean addNewAllCrimeResponseObject(Map<String, Object> allCrimeResponseMap) {
+    public boolean add(Map<String, Object> crime) {
         FluentJdbc connector = FluentConnector.getConnector();
         Query query = connector.query();
 
         return query.transaction().in(() -> {
-            Map<String, Object> location = (Map<String, Object>) allCrimeResponseMap.get(DatabaseColumn.LOCATIONS);
-            Map<String, Object> outcome = (Map<String, Object>) allCrimeResponseMap.get(DatabaseColumn.OUTCOMES);
+            Map<String, Object> location = (Map<String, Object>) crime.get(DatabaseColumn.LOCATIONS);
+            Map<String, Object> outcome = (Map<String, Object>) crime.get(DatabaseColumn.OUTCOMES);
             Map<String, Object> street = (Map<String, Object>) location.get(DatabaseColumn.STREETS);
             long streetId = findStreetId(query, street);
             long locationId;
@@ -50,16 +50,12 @@ public class PoliceApiDaoImpl implements PoliceApiDao {
                 locationId = addNewLocation(query, location, streetId);
             }
             Long outcomeId = outcome != null ? addNewOutcome(query, outcome) : null;
-            return addNewCrime(query, allCrimeResponseMap, locationId, outcomeId) != -1; // -1: can't add
+            return addNewCrime(query, crime, locationId, outcomeId) != -1; // -1: can't add
         });
     }
 
     @Override
     public void clear() {
-    }
-
-    @Override
-    public void init(String... args) {
     }
 
     /**
