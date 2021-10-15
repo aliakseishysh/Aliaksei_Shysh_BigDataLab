@@ -1,4 +1,38 @@
-#!/usr/bin/bash
+#!/bin/bash
+#
+# Task 3 deployment script
+
+####################################################################
+# function to print help message
+####################################################################
+function print_help_message() {
+  echo "Script for Task 3 deployment"
+  echo "Usage:"
+  echo "  ./run.sh [OPTIONS]"
+  echo "Options:"
+  echo "  -h/--help                    OPTIONAL. Echo help message,\
+ (no arguments required)"
+  echo "  -v/--verbose                 OPTIONAL. Run script in \
+ verbose mode (only script info), (no arguments required)"
+  echo "  -m/--maven                   OPTIONAL. Package project \
+with maven (clear, compile, package), (no arguments required)"
+  echo "  -c/--clear                   OPTIONAL. Run \
+ DatabaseDeletion.sql script to drop database task_3.\
+ (no arguments required)"
+  echo "  -f/--file-path               REQUIRED. Path to file\
+ with coordinates. e.g.: -f filename, \
+ --file-path=~/filename"
+  echo "  -d/--date                    REQUIRED. Initial date \
+ to download from api in format yyyy-MM. e.g.: -d 2021-01,\
+ --date=2021-01;"
+  echo "  -a/--api                     REQUIRED. Api name to \
+ call. e.g.: -a api-name, --api=api-name"
+  echo "  -n/--month-count             OPTIONAL. Months to\
+ process. e.g.: --month-count=2: if --date=2021-01 then \
+ it will download 2021-01 and 2021-02. DEFAULT=1"
+  echo "  -s/--save-to-file            OPTIONAL. Save program \
+input to file. e.g.: -s filename, --save-to-file=~/filename"
+}
 
 ############################ GLOBALS ###########################################
 
@@ -55,11 +89,11 @@ function parse_parameters() {
       v | verbose) VERBOSE_FLAG=true ;;
       m | maven) MAVEN_FLAG=true ;;
       c | clear) DROP_DATABASE_FLAG=true ;;
-      f | file_path) needs_arg "$OPTARG"; FILE_PATH="${OPTARG}" ;;
+      f | file-path) needs_arg "$OPTARG"; FILE_PATH="${OPTARG}" ;;
       d | date) needs_arg "$OPTARG"; DATE="${OPTARG}" ;;
       a | api) needs_arg "$OPTARG"; API_NAME="${OPTARG}" ;;
-      month-count) needs_arg "$OPTARG"; MONTH_COUNT="${OPTARG}" ;;
-      save-to-file) needs_arg "$OPTARG"; SAVE_TO_FILE="${OPTARG}" ;;
+      n | month-count) needs_arg "$OPTARG"; MONTH_COUNT="${OPTARG}" ;;
+      s | save-to-file) needs_arg "$OPTARG"; SAVE_TO_FILE="${OPTARG}" ;;
       ??*) die "Illegal option --${OPT}" ;;                                            # bad long option
       \?) exit 2 ;;                                                                    # bad short option (error reported via getopts)
     esac
@@ -151,13 +185,14 @@ function redirect_output() {
 
 
 ############################ SCRIPT ############################################
-check_if_postgresql_is_active || exit_if_error $? "Postgresql service is not active"
+
 parse_parameters "$@" || exit_if_error $? "Can't parse command line arguments"
 if "${HELP_FLAG}"; then print_help_message; exit 0; fi;
 redirect_output || exit_if_error $? "Can't redirect output"
 
 file_path_relative_to_absolute || exit_if_error $? "File with stations doesn't exist"
 
+check_if_postgresql_is_active || exit_if_error $? "Postgresql service is not active"
 try_drop_database
 try_create_database || exit_if_error $? "Can't create database ${DATABASE_NAME}"
 

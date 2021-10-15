@@ -10,12 +10,28 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import static by.aliakseishysh.pinfo.dao.DatabaseColumn.*;
+import static by.aliakseishysh.pinfo.dao.DatabaseColumn.CRIMES_CATEGORY;
+import static by.aliakseishysh.pinfo.dao.DatabaseColumn.CRIMES_CONTEXT;
+import static by.aliakseishysh.pinfo.dao.DatabaseColumn.CRIMES_ID;
+import static by.aliakseishysh.pinfo.dao.DatabaseColumn.CRIMES_LOCATION;
+import static by.aliakseishysh.pinfo.dao.DatabaseColumn.CRIMES_LOCATION_SUBTYPE;
+import static by.aliakseishysh.pinfo.dao.DatabaseColumn.CRIMES_LOCATION_TYPE;
+import static by.aliakseishysh.pinfo.dao.DatabaseColumn.CRIMES_MONTH;
+import static by.aliakseishysh.pinfo.dao.DatabaseColumn.CRIMES_OUTCOME_STATUS;
+import static by.aliakseishysh.pinfo.dao.DatabaseColumn.CRIMES_PERSISTENT_ID;
+import static by.aliakseishysh.pinfo.dao.DatabaseColumn.LOCATIONS;
+import static by.aliakseishysh.pinfo.dao.DatabaseColumn.LOCATIONS_LATITUDE;
+import static by.aliakseishysh.pinfo.dao.DatabaseColumn.LOCATIONS_LONGITUDE;
+import static by.aliakseishysh.pinfo.dao.DatabaseColumn.LOCATIONS_STREET;
+import static by.aliakseishysh.pinfo.dao.DatabaseColumn.OUTCOMES;
+import static by.aliakseishysh.pinfo.dao.DatabaseColumn.OUTCOMES_CATEGORY;
+import static by.aliakseishysh.pinfo.dao.DatabaseColumn.OUTCOMES_DATE;
+import static by.aliakseishysh.pinfo.dao.DatabaseColumn.STREETS;
+import static by.aliakseishysh.pinfo.dao.DatabaseColumn.STREETS_ID;
+import static by.aliakseishysh.pinfo.dao.DatabaseColumn.STREETS_NAME;
 
 
 public class ResponseParser {
-
-    private static final long index = 0;
 
     /**
      * Parses json string to {@code List<ResponseObject>}
@@ -65,21 +81,6 @@ public class ResponseParser {
         locations.put(STREETS, streets);
         crimes.put(OUTCOMES, outcomes);
         return crimes;
-        //return AllCrimeResponseObject.newBuilder()
-                //.setCategory(jsonObject.getString(CRIMES_CATEGORY))
-                //.setPersistentId(jsonObject.getString(CRIMES_PERSISTENT_ID))
-                //.setMonth(jsonObject.getString(CRIMES_MONTH))
-                //.setLocationLatitude(location.getString(LOCATIONS_LATITUDE))
-                //.setLocationStreetId(street.getLong(STREETS_ID))
-                //.setLocationStreetName(street.getString(STREETS_NAME))
-                //.setLocationLongtitude(location.getString(LOCATIONS_LONGITUDE))
-                //.setContext(jsonObject.getString(CRIMES_CONTEXT))
-                //.setId(jsonObject.getLong(CRIMES_ID))
-                //.setLocationType(jsonObject.getString(CRIMES_LOCATION_TYPE))
-                //.setLocationSubtype(jsonObject.getString(CRIMES_LOCATION_SUBTYPE))
-                //.setOutcomeStatusCategory(outcome != null ? outcome.getString(OUTCOMES_CATEGORY) : null)
-                //.setOutcomeStatusDate(outcome != null ? outcome.getString(OUTCOMES_DATE) : null)
-                //.build();
     }
 
 

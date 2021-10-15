@@ -2,12 +2,18 @@ package by.aliakseishysh.pinfo.util;
 
 import org.apache.http.NameValuePair;
 import org.apache.http.client.utils.URIBuilder;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class UriBuilder {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(UriBuilder.class);
 
     /**
      * Method for building uris.
@@ -23,7 +29,13 @@ public class UriBuilder {
                     .build();
             return uri.toString();
         } catch (URISyntaxException e) {
-            throw new UnsupportedOperationException(); // TODO handle exception
+            LOGGER.error("URISyntaxException occurred: " + baseUri + " " +
+                    parameters
+                            .stream()
+                            .flatMap((nvm) -> Stream.of(nvm.getName() + ": " + nvm.getValue()))
+                            .collect(Collectors.joining("; "))
+            );
+            return baseUri;
         }
     }
 

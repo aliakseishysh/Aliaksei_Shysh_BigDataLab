@@ -6,7 +6,7 @@ package by.aliakseishysh.pinfo.command;
 public enum CommandDefiner {
 
     ALL_CRIME("all-crime", new AllCrimeCommand()),
-    EXIT("exit", null); // TODO create command
+    EXIT("exit", new ExitCommand());
 
     private final String name;
     private final Command command;

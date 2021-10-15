@@ -2,22 +2,24 @@ package by.aliakseishysh.pinfo.dao.impl;
 
 import by.aliakseishysh.pinfo.dao.CsvHeader;
 import by.aliakseishysh.pinfo.dao.PoliceApiDao;
+import by.aliakseishysh.pinfo.exception.FileWritingException;
 import by.aliakseishysh.pinfo.util.CsvWriter;
 import by.aliakseishysh.pinfo.util.Mapper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import java.util.List;
 import java.util.Map;
 
-public class PoliceApiDaoFileImpl  implements PoliceApiDao {
+public class PoliceApiDaoFileImpl implements PoliceApiDao {
 
-    private boolean isHeaderWritten = false;
+    private static final Logger LOGGER = LoggerFactory.getLogger(PoliceApiDaoFileImpl.class);
+    private boolean isHeaderWritten;
     private CsvWriter csvWriter;
 
     public PoliceApiDaoFileImpl(boolean isHeaderWritten, CsvWriter csvWriter) {
         this.csvWriter = csvWriter;
         this.isHeaderWritten = isHeaderWritten;
     }
-
 
 
     /**
@@ -28,13 +30,18 @@ public class PoliceApiDaoFileImpl  implements PoliceApiDao {
      */
     @Override
     public boolean add(Map<String, Object> crime) {
-        if (isHeaderWritten == false) {
-            csvWriter.writeLine(CsvHeader.ALL_CRIME_HEADERS);
-            isHeaderWritten = true;
+        try {
+            if (!isHeaderWritten) {
+                csvWriter.writeLine(CsvHeader.ALL_CRIME_HEADERS);
+                isHeaderWritten = true;
+            }
+            String[] data = Mapper.allCrimeResponseMapToStringArray(crime);
+            csvWriter.writeLine(data);
+            return true;
+        } catch (FileWritingException e) {
+            LOGGER.error("Can't write to file. " + e.getCause(), e);
+            return false;
         }
-        String[] data = Mapper.allCrimeResponseMapToStringArray(crime);
-        csvWriter.writeLine(data);
-        return true; // TODO handle
     }
 
     @Override
