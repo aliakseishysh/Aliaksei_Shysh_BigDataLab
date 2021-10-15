@@ -1,5 +1,7 @@
 package by.aliakseishysh.pinfo.dao;
 
+import by.aliakseishysh.pinfo.exception.FileException;
+
 import java.util.Map;
 
 public interface PoliceApiDao {
@@ -15,6 +17,6 @@ public interface PoliceApiDao {
     /**
      * Clears data in dao if needed.
      */
-    void clear();
+    void clear() throws FileException;
 
 }

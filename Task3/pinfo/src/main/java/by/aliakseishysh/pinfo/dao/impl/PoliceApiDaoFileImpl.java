@@ -2,7 +2,7 @@ package by.aliakseishysh.pinfo.dao.impl;
 
 import by.aliakseishysh.pinfo.dao.CsvHeader;
 import by.aliakseishysh.pinfo.dao.PoliceApiDao;
-import by.aliakseishysh.pinfo.exception.FileWritingException;
+import by.aliakseishysh.pinfo.exception.FileException;
 import by.aliakseishysh.pinfo.util.CsvWriter;
 import by.aliakseishysh.pinfo.util.Mapper;
 import org.slf4j.Logger;
@@ -38,15 +38,16 @@ public class PoliceApiDaoFileImpl implements PoliceApiDao {
             String[] data = Mapper.allCrimeResponseMapToStringArray(crime);
             csvWriter.writeLine(data);
             return true;
-        } catch (FileWritingException e) {
+        } catch (FileException e) {
             LOGGER.error("Can't write to file. " + e.getCause(), e);
             return false;
         }
     }
 
     @Override
-    public void clear() {
+    public void clear() throws FileException {
         isHeaderWritten = false;
+        csvWriter.close();
         csvWriter = null;
     }
 
