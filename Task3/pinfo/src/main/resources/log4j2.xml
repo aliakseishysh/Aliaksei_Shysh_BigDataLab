@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration>
+    <Properties>
+        <Property name="logs">logs/</Property>
+        <Property name="pattern_console">
+            %d{HH:mm:ss.SSS} [%t] %-5level %logger{1} - %msg%n
+        </Property>
+        <Property name="pattern_file">
+            %d{HH:mm:ss.SSS} [%t] %-5level %logger{5} - %msg%n
+        </Property>
+    </Properties>
+
+    <Appenders>
+        <Console name="Console" target="SYSTEM_OUT">
+            <PatternLayout pattern="${pattern_console}"/>
+        </Console>
+
+        <RollingFile name="LogFile"
+                     fileName="${logs}/task_3.log"
+                     append="true"
+                     filePattern="${logs}/${date:yyyy-MM-dd}/%d{yyyy-MM-dd_HH}_%i.log">
+            <PatternLayout pattern="${pattern_file}"/>
+            <Policies>
+                <TimeBasedTriggeringPolicy interval="1"/>
+                <SizeBasedTriggeringPolicy size="15 KB"/>
+            </Policies>
+            <DefaultRolloverStrategy max="10"/>
+        </RollingFile>
+    </Appenders>
+
+    <Loggers>
+        <Root level="all">
+            <AppenderRef ref="Console" level="info"/>
+            <AppenderRef ref="LogFile" level="all"/>
+        </Root>
+    </Loggers>
+</Configuration>
