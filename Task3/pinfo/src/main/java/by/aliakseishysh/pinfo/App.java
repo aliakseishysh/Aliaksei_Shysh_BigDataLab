@@ -1,17 +1,18 @@
 package by.aliakseishysh.pinfo;
 
-import by.aliakseishysh.pinfo.database.FluentConnector;
-import by.aliakseishysh.pinfo.database.HcpSource;
-import by.aliakseishysh.pinfo.exception.CliPropertiesException;
-import by.aliakseishysh.pinfo.exception.CommandException;
-import by.aliakseishysh.pinfo.util.PropertiesParser;
 import by.aliakseishysh.pinfo.command.Argument;
 import by.aliakseishysh.pinfo.command.Command;
 import by.aliakseishysh.pinfo.command.CommandDefiner;
+import by.aliakseishysh.pinfo.dao.FluentConnector;
+import by.aliakseishysh.pinfo.dao.HcpSource;
+import by.aliakseishysh.pinfo.exception.CliPropertiesException;
+import by.aliakseishysh.pinfo.exception.CommandException;
+import by.aliakseishysh.pinfo.util.PropertiesParser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.*;
+import java.util.Properties;
+
 
 /**
  * Main class for initialization and running commands
@@ -22,6 +23,7 @@ public class App {
 
     /**
      * Main method
+     *
      * @param args command line arguments
      */
     public static void main(String... args) throws CliPropertiesException, CommandException {
@@ -42,8 +44,6 @@ public class App {
         HcpSource.getSource();
         FluentConnector.getConnector();
     }
-
-
 
 
 }

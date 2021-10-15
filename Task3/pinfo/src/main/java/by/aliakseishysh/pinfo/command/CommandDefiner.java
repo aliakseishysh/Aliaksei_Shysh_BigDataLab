@@ -11,14 +11,6 @@ public enum CommandDefiner {
     private final String name;
     private final Command command;
 
-    public String getName() {
-        return name;
-    }
-
-    public Command getCommand() {
-        return command;
-    }
-
     CommandDefiner(String name, Command command) {
         this.name = name;
         this.command = command;
@@ -38,5 +30,13 @@ public enum CommandDefiner {
             }
         }
         return result;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public Command getCommand() {
+        return command;
     }
 }

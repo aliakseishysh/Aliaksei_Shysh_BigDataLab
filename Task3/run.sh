@@ -4,12 +4,15 @@
 
 API_NAME=''
 DATE=''
+START_DATE=''
+END_DATE=''
 FILE_PATH=''
+SAVE_TO_FILE=''
 
 HELP_FLAG=false
 VERBOSE_FLAG=false
 MAVEN_FLAG=false
-
+DROP_DATABASE_FLAG=false
 
 ############################ ERROR HANDLING ####################################
 
@@ -31,6 +34,7 @@ function exit_if_error() {
 ####################################################################
 # function to set parameters to variables
 ####################################################################
+# shellcheck disable=SC2214
 function parse_parameters() {
   function die() { echo "$*" >&2; exit 2; }
   function needs_arg() {
@@ -41,19 +45,24 @@ function parse_parameters() {
 
   OPTIND=1
 
-  while getopts hvmf:d:a:-: OPT; do
+  while getopts hvmcf:d:a:-: OPT; do
     if [[ "$OPT" = "-" ]]; then                                                        # long option: reformulate OPT and OPTARG
       OPT="${OPTARG%%=*}"                                                              # extract long option name
       OPTARG="${OPTARG#"$OPT"}"                                                        # extract long option argument (may be empty)
       OPTARG="${OPTARG#=}"                                                             # if long option argument, remove assigning `=`
     fi
     case "$OPT" in
-      h | help) HELP_FLAG=true ;;                                                      # it is impossible to specify long options with getopts
-      v | verbose) VERBOSE_FLAG=true ;;                                                # it is impossible to specify long options with getopts
-      m | maven) MAVEN_FLAG=true ;;                                                    # it is impossible to specify long options with getopts
-      f | file_path) needs_arg "$OPTARG"; FILE_PATH="${OPTARG}" ;;                     # it is impossible to specify long options with getopts
-      d | date) needs_arg "$OPTARG"; DATE="${OPTARG}" ;;                               # it is impossible to specify long options with getopts
-      a | api) needs_arg "$OPTARG"; API_NAME="${OPTARG}" ;;                            # it is impossible to specify long options with getopts
+      h | help) HELP_FLAG=true ;;
+      v | verbose) VERBOSE_FLAG=true ;;
+      m | maven) MAVEN_FLAG=true ;;
+      c | clear) DROP_DATABASE_FLAG=true ;;
+      f | file_path) needs_arg "$OPTARG"; FILE_PATH="${OPTARG}" ;;
+      d | date) needs_arg "$OPTARG"; DATE="${OPTARG}" ;;
+      a | api) needs_arg "$OPTARG"; API_NAME="${OPTARG}" ;;
+      start-date) needs_arg "$OPTARG"; START_DATE="${OPTARG}" ;;
+      end-date) needs_arg "$OPTARG"; END_DATE="${OPTARG}" ;;
+      save-to-file) needs_arg "$OPTARG"; SAVE_TO_FILE="${OPTARG}" ;;
+
       ??*) die "Illegal option --${OPT}" ;;                                            # bad long option
       \?) exit 2 ;;                                                                    # bad short option (error reported via getopts)
     esac
@@ -83,6 +92,26 @@ function try_create_database() {
     fi
 }
 
+####################################################################
+# function to check if postgresql service is active
+####################################################################
+function check_if_postgresql_is_active() {
+  systemctl is-active --quiet postgresql
+}
+
+####################################################################
+# function to clean database
+####################################################################
+function try_drop_database() {
+  if [ "${DROP_DATABASE_FLAG}" = true ]; then
+    if (psql -f ./sql/DatabaseDeletion.sql) >&3; then
+      printf "Database cleared successfully!" >&1
+    else
+      return 1
+    fi
+  fi
+}
+
 
 
 
@@ -95,6 +124,7 @@ function run_java_app() {
   java -jar pinfo/target/pinfo-1.0.jar \
   -Dcommand="${API_NAME}" \
   -Dfile_path="${FILE_PATH}" \
+  -Dsave_to_file="${SAVE_TO_FILE}" \
   -Ddate="${DATE}" >&3
 }
 
@@ -123,12 +153,14 @@ function redirect_output() {
 
 
 ############################ SCRIPT ############################################
+check_if_postgresql_is_active || exit_if_error $? "Postgresql service is not active"
 parse_parameters "$@" || exit_if_error $? "Can't parse command line arguments"
 if "${HELP_FLAG}"; then print_help_message; exit 0; fi;
 redirect_output || exit_if_error $? "Can't redirect output"
 
 file_path_relative_to_absolute || exit_if_error $? "File with stations doesn't exist"
 
+try_drop_database
 try_create_database || exit_if_error $? "Can't create database ${DATABASE_NAME}"
 
 if "${MAVEN_FLAG}"; then package_java_app; fi;

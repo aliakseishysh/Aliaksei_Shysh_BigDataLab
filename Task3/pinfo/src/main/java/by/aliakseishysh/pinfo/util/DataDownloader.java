@@ -13,11 +13,22 @@ import org.apache.http.util.EntityUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.time.Duration;
-import java.util.*;
-import java.util.concurrent.*;
+import java.util.Collections;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Queue;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.Callable;
+import java.util.concurrent.CompletionService;
+import java.util.concurrent.ExecutorCompletionService;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
@@ -25,13 +36,27 @@ import java.util.stream.Collectors;
 public class DataDownloader {
 
     private static final Logger logger = LoggerFactory.getLogger(DataDownloader.class);
-    private final AtomicInteger index = new AtomicInteger(0);
+    private static final List<String> responses = Collections.synchronizedList(new LinkedList<>());
     private static BlockingQueue<String> uris;
-    private static final List<String> responses = Collections.synchronizedList(new ArrayList<>());
     private static ExecutorService executorService;
     private static CompletionService<Boolean> completionService;
     private static Bucket bucket;
     private static int overdraft;
+    private final AtomicInteger index = new AtomicInteger(0);
+
+    /**
+     * Sets default settings for {@code DataDownloader}
+     */
+    private static void downloaderSetDefault() {
+        overdraft = 4;
+        int threadCount = 4;
+        int requestsPerSecond = 4;
+        executorService = Executors.newFixedThreadPool(threadCount);
+        completionService = new ExecutorCompletionService<>(executorService);
+        bucket = Bucket4j.builder()
+                .addLimit(Bandwidth.classic(overdraft, Refill.greedy(requestsPerSecond, Duration.ofSeconds(1))))
+                .build();
+    }
 
     /**
      * Downloads data from provided uris
@@ -65,20 +90,6 @@ public class DataDownloader {
         }
         logger.info("Downloaded: " + responses.size() + "; Requested: " + requestUris.size());
         return responses;
-    }
-
-    /**
-     * Sets default settings for {@code DataDownloader}
-     */
-    private static void downloaderSetDefault() {
-        overdraft = 4;
-        int threadCount = 4;
-        int requestsPerSecond = 4;
-        executorService = Executors.newFixedThreadPool(threadCount);
-        completionService = new ExecutorCompletionService<>(executorService);
-        bucket = Bucket4j.builder()
-                .addLimit(Bandwidth.classic(overdraft, Refill.greedy(requestsPerSecond, Duration.ofSeconds(1))))
-                .build();
     }
 
     /**

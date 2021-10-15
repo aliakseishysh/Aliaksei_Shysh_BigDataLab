@@ -48,8 +48,8 @@ BEGIN
 
 CREATE TABLE IF NOT EXISTS streets(
    "street_id" bigserial PRIMARY KEY,
-   "id" bigint NOT NULL,
-   "name" VARCHAR(255) NOT NULL
+   "id" bigint NOT NULL UNIQUE,
+   "name" VARCHAR(255) NOT NULL UNIQUE
 );
 
 CREATE TABLE IF NOT EXISTS locations(
@@ -63,8 +63,8 @@ CREATE TABLE IF NOT EXISTS outcomes(
     "status_id" bigserial PRIMARY KEY,
     -- "category" status,
     "category" VARCHAR(255),
-    -- "date" DATE
-    "date" VARCHAR(255)
+    "date" DATE
+    -- "date" VARCHAR(255)
 );
 
 CREATE TABLE IF NOT EXISTS crimes(
@@ -72,7 +72,7 @@ CREATE TABLE IF NOT EXISTS crimes(
     "category" VARCHAR(255) NOT NULL,
     "persistent_id" VARCHAR(255) NOT NULL,
     -- "month" DATE,
-    "month" VARCHAR(255) NOT NULL,
+    "month" DATE NOT NULL,
     "location" bigint NOT NULL REFERENCES locations (location_id),
     "context" VARCHAR(255) NOT NULL,
     "id" bigint NOT NULL,

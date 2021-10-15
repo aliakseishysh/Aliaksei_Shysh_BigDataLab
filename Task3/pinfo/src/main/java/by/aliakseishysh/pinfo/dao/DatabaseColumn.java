@@ -1,4 +1,4 @@
-package by.aliakseishysh.pinfo.database;
+package by.aliakseishysh.pinfo.dao;
 
 /**
  * Represents database column names
@@ -6,19 +6,24 @@ package by.aliakseishysh.pinfo.database;
 public class DatabaseColumn {
 
     // streets
+    public static final String STREETS = "streets";
     public static final String STREETS_STREET_ID = "street_id";
     public static final String STREETS_ID = "id";
     public static final String STREETS_NAME = "name";
+
     // locations
+    public static final String LOCATIONS = "locations";
     public static final String LOCATIONS_LOCATION_ID = "location_id";
     public static final String LOCATIONS_LATITUDE = "latitude";
     public static final String LOCATIONS_STREET = "street";
     public static final String LOCATIONS_LONGITUDE = "longitude";
-    // outcome_statuses
+    // outcomes
+    public static final String OUTCOMES = "outcomes";
     public static final String OUTCOMES_STATUS_ID = "status_id";
     public static final String OUTCOMES_CATEGORY = "category";
     public static final String OUTCOMES_DATE = "date";
     // crimes
+    public static final String CRIMES = "crimes";
     public static final String CRIMES_CRIME_ID = "crime_id";
     public static final String CRIMES_CATEGORY = "category";
     public static final String CRIMES_PERSISTENT_ID = "persistent_id";

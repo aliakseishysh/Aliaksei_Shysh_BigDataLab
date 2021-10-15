@@ -10,7 +10,7 @@ import java.util.List;
 public class UriBuilder {
 
     /**
-     * Method for building uris
+     * Method for building uris.
      *
      * @param baseUri    base uri
      * @param parameters uri parameters to add

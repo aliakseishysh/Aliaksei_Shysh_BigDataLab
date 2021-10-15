@@ -1,4 +1,4 @@
-package by.aliakseishysh.pinfo.database;
+package by.aliakseishysh.pinfo.dao;
 
 import org.codejargon.fluentjdbc.api.FluentJdbc;
 import org.codejargon.fluentjdbc.api.FluentJdbcBuilder;
