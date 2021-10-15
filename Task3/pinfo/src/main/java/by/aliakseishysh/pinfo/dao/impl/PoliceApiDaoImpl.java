@@ -22,6 +22,7 @@ public class PoliceApiDaoImpl implements PoliceApiDao {
     private static final String SELECT_UNIQUE_STREET_ID = "SELECT street_id FROM streets WHERE id = ? OR name = ?";
     private static final String SELECT_UNIQUE_LOCATION_ID = "SELECT location_id FROM locations WHERE latitude = ? " +
             "AND street = ? AND longitude = ?";
+    private static final String SELECT_UNIQUE_CRIME_ID = "SELECT crime_id FROM crimes WHERE id = ? OR persistent_id = ?";
 
     private PoliceApiDaoImpl() {
     }
@@ -52,7 +53,11 @@ public class PoliceApiDaoImpl implements PoliceApiDao {
             locationId = locationId == -1 ? addNewLocation(query, location, streetId) : locationId;
 
             Long outcomeId = outcome != null ? addNewOutcome(query, outcome) : null;
-            return addNewCrime(query, crime, locationId, outcomeId) != -1;
+
+            long crimeId = findCrimeId(query, crime);
+            crimeId = crimeId == -1 ? addNewCrime(query, crime, locationId, outcomeId) : crimeId;
+
+            return crimeId != -1;
         });
     }
 
@@ -182,6 +187,19 @@ public class PoliceApiDaoImpl implements PoliceApiDao {
         return query.select(SELECT_UNIQUE_LOCATION_ID)
                 .params(location.get(DatabaseColumn.LOCATIONS_LATITUDE), streetId,
                         location.get(DatabaseColumn.LOCATIONS_LONGITUDE))
+                .firstResult(Mappers.singleLong()).orElse(-1L);
+    }
+
+    /**
+     * Method for finding crime id.
+     *
+     * @param query performs operation on query
+     * @param crime map representing crime
+     * @return crime id or -1 otherwise
+     */
+    private long findCrimeId(Query query, Map<String, Object> crime) {
+        return query.select(SELECT_UNIQUE_CRIME_ID)
+                .params(crime.get(DatabaseColumn.CRIMES_ID), crime.get(DatabaseColumn.CRIMES_PERSISTENT_ID))
                 .firstResult(Mappers.singleLong()).orElse(-1L);
     }
 

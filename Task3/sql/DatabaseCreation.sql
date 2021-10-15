@@ -27,11 +27,11 @@ CREATE TABLE IF NOT EXISTS outcomes(
 CREATE TABLE IF NOT EXISTS crimes(
     "crime_id" bigserial PRIMARY KEY,
     "category" VARCHAR(255) NOT NULL,
-    "persistent_id" VARCHAR(255) NOT NULL,
+    "persistent_id" VARCHAR(255) NOT NULL UNIQUE,
     "month" DATE NOT NULL,
     "location" bigint NOT NULL REFERENCES locations (location_id),
     "context" VARCHAR(255) NOT NULL,
-    "id" bigint NOT NULL,
+    "id" bigint NOT NULL UNIQUE,
     -- "location_type" location_type NOT NULL,
     "location_type" VARCHAR(255) NOT NULL,
     "location_subtype" VARCHAR(255) NOT NULL,
