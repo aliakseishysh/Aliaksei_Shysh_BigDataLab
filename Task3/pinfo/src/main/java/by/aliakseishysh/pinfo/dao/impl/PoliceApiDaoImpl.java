@@ -164,12 +164,6 @@ public class PoliceApiDaoImpl implements PoliceApiDao {
      * @return street id or -1 otherwise
      */
     private long findStreetId(Query query, Map<String, Object> street) {
-        /* TODO streets with different id's and same names.
-         *  Don't know if it is a bug.
-         *  To change current behavior to another:
-         *    1) Replace OR in query with AND
-         *    2) Remove database field `name` unique constraint
-         */
         return query.select(SELECT_UNIQUE_STREET_ID)
                 .params(street.get(DatabaseColumn.STREETS_ID), street.get(DatabaseColumn.STREETS_NAME))
                 .firstResult(Mappers.singleLong()).orElse(-1L);

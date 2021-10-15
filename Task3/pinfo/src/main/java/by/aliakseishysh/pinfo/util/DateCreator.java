@@ -10,6 +10,13 @@ import java.util.stream.IntStream;
 
 public class DateCreator {
 
+    /**
+     * Creates list of dates.
+     * @param startDate start date
+     * @param monthCount month amount to create (including {@code startDate})
+     * @return list of created dates
+     * @throws ParseException if method can't parse {@code startDate}
+     */
     public static List<String> createDates(String startDate, int monthCount) throws ParseException {
         List<String> dates = new ArrayList<>();
         dates.add(startDate);

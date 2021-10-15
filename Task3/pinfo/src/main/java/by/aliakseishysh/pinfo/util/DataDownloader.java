@@ -76,14 +76,15 @@ public class DataDownloader {
                 }
                 bucket.asScheduler().consume(1);
                 if (!uris.isEmpty()) {
-                    completionService.submit(new CallableDownloader());
+                    String uri = uris.take();
+                    completionService.submit(new CallableDownloader(uri));
                     futuresSize++;
                 } else {
                     break;
                 }
             }
             executorService.shutdown();
-            executorService.awaitTermination(100, TimeUnit.SECONDS);
+            executorService.awaitTermination(20, TimeUnit.SECONDS);
         } catch (InterruptedException e) {
             logger.debug("Thread was interrupted: {}", e.getMessage());
             executorService.shutdownNow();
@@ -97,49 +98,46 @@ public class DataDownloader {
      */
     private class CallableDownloader implements Callable<Boolean> {
         private int runIndex = 0;
+        private final String uri;
+
+        private CallableDownloader(String uri) {
+            this.uri = uri;
+        }
 
         @Override
         public Boolean call() {
             boolean result = false;
-            try {
-                int b = index.addAndGet(1);
-                logger.info("Started: " + b + ", remaining: " + uris.size());
-                String url = uris.take();
-                String responseResult;
-                try (CloseableHttpClient httpclient = HttpClients.createDefault()) {
-                    HttpGet httpGet = new HttpGet(url);
-                    try (CloseableHttpResponse response = httpclient.execute(httpGet)) {
-                        HttpEntity responseEntity = response.getEntity();
-
-                        switch (response.getStatusLine().getStatusCode()) {
-                            case 200:
-                                responseResult = new BufferedReader(new InputStreamReader(responseEntity.getContent()))
-                                        .lines().collect(Collectors.joining());
-                                logger.info("200: Downloaded " + b);
-                                responses.add(responseResult);
-                                result = true;
-                                break;
-                            case 429:
-                                if (runIndex < 5) {
-                                    logger.info(response.getStatusLine() + ": Redownloading " + b);
-                                    uris.put(url);
-                                    runIndex++;
-                                    call();
-                                } else {
-                                    logger.info(response.getStatusLine() + ": Can't download, canceling..." + b);
-                                }
-                                break;
-                            default:
-                                logger.info(response.getStatusLine() + ": Canceling " + b);
-                                break;
-                        }
-                        EntityUtils.consume(responseEntity);
+            int b = index.addAndGet(1);
+            logger.info("Started: " + b + ", remaining: " + uris.size());
+            String responseResult;
+            try (CloseableHttpClient httpclient = HttpClients.createDefault()) {
+                HttpGet httpGet = new HttpGet(uri);
+                try (CloseableHttpResponse response = httpclient.execute(httpGet)) {
+                    HttpEntity responseEntity = response.getEntity();
+                    switch (response.getStatusLine().getStatusCode()) {
+                        case 200:
+                            responseResult = new BufferedReader(new InputStreamReader(responseEntity.getContent()))
+                                    .lines().collect(Collectors.joining());
+                            logger.info("200: Downloaded " + b);
+                            responses.add(responseResult);
+                            result = true;
+                            break;
+                        case 429:
+                            if (runIndex < 5) {
+                                logger.info(response.getStatusLine() + ": Redownloading " + b);
+                                runIndex++;
+                                call();
+                            } else {
+                                logger.info(response.getStatusLine() + ": Can't download, canceling..." + b);
+                            }
+                            break;
+                        default:
+                            logger.info(response.getStatusLine() + ": Canceling " + b);
                     }
-                } catch (IOException e) {
-                    logger.error("Connection problem: {}", e.getMessage());
+                    EntityUtils.consume(responseEntity);
                 }
-            } catch (InterruptedException e) {
-                logger.debug("Thread was interrupted: {}", e.getMessage());
+            } catch (IOException e) {
+                logger.error("Connection problem: {}", e.getMessage());
             }
             return result;
         }

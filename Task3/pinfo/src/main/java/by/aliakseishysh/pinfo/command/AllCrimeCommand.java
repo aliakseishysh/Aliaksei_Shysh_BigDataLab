@@ -4,8 +4,7 @@ import by.aliakseishysh.pinfo.dao.PoliceApiDao;
 import by.aliakseishysh.pinfo.dao.impl.PoliceApiDaoFileImpl;
 import by.aliakseishysh.pinfo.dao.impl.PoliceApiDaoImpl;
 import by.aliakseishysh.pinfo.exception.CommandException;
-import by.aliakseishysh.pinfo.exception.FileReadingException;
-import by.aliakseishysh.pinfo.exception.FileWritingException;
+import by.aliakseishysh.pinfo.exception.FileException;
 import by.aliakseishysh.pinfo.util.CsvReader;
 import by.aliakseishysh.pinfo.util.CsvWriter;
 import by.aliakseishysh.pinfo.util.DataDownloader;
@@ -84,7 +83,7 @@ public class AllCrimeCommand implements Command {
                 LOGGER.error("Can't execute the command: properties missing");
                 throw new CommandException("Can't execute the command: properties missing");
             }
-        } catch (FileReadingException | FileWritingException | ParseException | NumberFormatException e) {
+        } catch (ParseException | NumberFormatException | FileException e) {
             LOGGER.error("Can't execute the command", e);
             throw new CommandException("Can't execute the command", e);
         }
@@ -97,9 +96,9 @@ public class AllCrimeCommand implements Command {
      * @param coordinatesPath path to file with coordinates
      * @param dates           download data on this dates
      * @return queue with uris for current command
-     * @throws FileReadingException if method can't read file with coordinates
+     * @throws FileException if method can't read file with coordinates
      */
-    private Queue<String> createRequests(final String coordinatesPath, List<String> dates) throws FileReadingException {
+    private Queue<String> createRequests(final String coordinatesPath, List<String> dates) throws FileException {
         List<String[]> places = CsvReader.readLines(coordinatesPath);
         Queue<String> requestUris = new LinkedList<>();
         dates.forEach((date) -> places.forEach((place) -> {
