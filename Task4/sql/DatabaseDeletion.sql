@@ -1,0 +1,1 @@
+DROP DATABASE task_4;
