@@ -83,19 +83,19 @@ public class ResponseParser {
         Map<String, Object> locations = new HashMap<>();
         Map<String, Object> outcomes = outcome != null ? new HashMap<>() : null;
 
-        crimes.put(CRIMES_CATEGORY, jsonObject.getString(CRIMES_CATEGORY));
-        crimes.put(CRIMES_PERSISTENT_ID, jsonObject.getString(CRIMES_PERSISTENT_ID));
+        crimes.put(CRIMES_CATEGORY, jsonObject.getString(CRIMES_CATEGORY) == JSONObject.NULL ? null : jsonObject.getString(CRIMES_CATEGORY));
+        crimes.put(CRIMES_PERSISTENT_ID, jsonObject.getString(CRIMES_PERSISTENT_ID) == JSONObject.NULL ? null : jsonObject.getString(CRIMES_PERSISTENT_ID));
         crimes.put(CRIMES_MONTH, Date.valueOf(jsonObject.getString(CRIMES_MONTH) + "-01"));
-        locations.put(LOCATIONS_LATITUDE, location.getString(LOCATIONS_LATITUDE));
+        locations.put(LOCATIONS_LATITUDE, location.getString(LOCATIONS_LATITUDE) == JSONObject.NULL ? null : location.getString(LOCATIONS_LATITUDE));
         streets.put(STREETS_ID, street.getLong(STREETS_ID));
-        streets.put(STREETS_NAME, street.getString(STREETS_NAME));
-        locations.put(LOCATIONS_LONGITUDE, location.getString(LOCATIONS_LONGITUDE));
-        crimes.put(CRIMES_CONTEXT, jsonObject.getString(CRIMES_CONTEXT));
+        streets.put(STREETS_NAME, street.getString(STREETS_NAME) == JSONObject.NULL ? null : street.getString(STREETS_NAME));
+        locations.put(LOCATIONS_LONGITUDE, location.getString(LOCATIONS_LONGITUDE) == JSONObject.NULL ? null : location.getString(LOCATIONS_LONGITUDE));
+        crimes.put(CRIMES_CONTEXT, jsonObject.getString(CRIMES_CONTEXT) == JSONObject.NULL ? null : jsonObject.getString(CRIMES_CONTEXT));
         crimes.put(CRIMES_ID, jsonObject.getLong(CRIMES_ID));
-        crimes.put(CRIMES_LOCATION_TYPE, jsonObject.getString(CRIMES_LOCATION_TYPE));
-        crimes.put(CRIMES_LOCATION_SUBTYPE, jsonObject.getString(CRIMES_LOCATION_SUBTYPE));
+        crimes.put(CRIMES_LOCATION_TYPE, jsonObject.getString(CRIMES_LOCATION_TYPE) == JSONObject.NULL ? null : jsonObject.getString(CRIMES_LOCATION_TYPE));
+        crimes.put(CRIMES_LOCATION_SUBTYPE, jsonObject.getString(CRIMES_LOCATION_SUBTYPE) == JSONObject.NULL ? null : jsonObject.getString(CRIMES_LOCATION_SUBTYPE));
         if (outcomes != null) {
-            outcomes.put(OUTCOMES_CATEGORY, outcome.getString(OUTCOMES_CATEGORY));
+            outcomes.put(OUTCOMES_CATEGORY, outcome.getString(OUTCOMES_CATEGORY) == JSONObject.NULL ? null : outcome.getString(OUTCOMES_CATEGORY));
             outcomes.put(OUTCOMES_DATE, Date.valueOf(outcome.getString(OUTCOMES_DATE) + "-01"));
         }
         crimes.put(LOCATIONS, locations);
@@ -117,11 +117,11 @@ public class ResponseParser {
             street = location.optJSONObject(LOCATIONS_STREET);
         }
 
-        JSONObject outcomeObject = jsonObject.optJSONObject(OUTCOME_OBJECTS);
+        JSONObject outcomeObject = jsonObject.optJSONObject(SAS_OUTCOME_OBJECT);
         Map<String, Object> sas = new HashMap<>();
-        Map<String, Object> streets = street == null ? null : new HashMap<>();
-        Map<String, Object> locations = location == null ? null : new HashMap<>();
-        Map<String, Object> outcomeObjects = outcomeObject == null ? null : new HashMap<>();
+        Map<String, Object> streets = street == null || street == JSONObject.NULL ? null : new HashMap<>();
+        Map<String, Object> locations = location == null || location == JSONObject.NULL ? null : new HashMap<>();
+        Map<String, Object> outcomeObjects = outcomeObject == null || outcomeObject == JSONObject.NULL ? null : new HashMap<>();
 
         sas.put(SAS_TYPE, jsonObject.get(SAS_TYPE));
         sas.put(SAS_INVOLVED_PERSON, jsonObject.get(SAS_INVOLVED_PERSON));
@@ -130,9 +130,9 @@ public class ResponseParser {
         sas.put(SAS_OPERATION, jsonObject.get(SAS_OPERATION) == JSONObject.NULL ? null : jsonObject.get(SAS_OPERATION));
         sas.put(SAS_OPERATION_NAME, jsonObject.get(SAS_OPERATION_NAME) == JSONObject.NULL ? null : jsonObject.get(SAS_OPERATION_NAME));
 
-        if (location != null) {
+        if (location != null && location != JSONObject.NULL) {
             locations.put(LOCATIONS_LATITUDE, location.getString(LOCATIONS_LATITUDE) == JSONObject.NULL ? null : location.getString(LOCATIONS_LATITUDE));
-            if (streets != null) {
+            if (street != null && street != JSONObject.NULL) {
                 streets.put(STREETS_ID, street.getLong(STREETS_ID));
                 streets.put(STREETS_NAME, street.getString(STREETS_NAME));
                 locations.put(STREETS, streets);
@@ -149,7 +149,7 @@ public class ResponseParser {
         sas.put(SAS_OBJECT_OF_SEARCH, jsonObject.get(SAS_OBJECT_OF_SEARCH) == JSONObject.NULL ? null : jsonObject.get(SAS_OBJECT_OF_SEARCH));
 
         // TODO not in documentation, but in response
-        if (outcomeObject != null) {
+        if (outcomeObject != null && outcomeObject != JSONObject.NULL) {
             outcomeObjects.put(OUTCOME_OBJECTS_ID, outcomeObject.get(OUTCOME_OBJECTS_ID) == JSONObject.NULL ? null : outcomeObject.get(OUTCOME_OBJECTS_ID));
             outcomeObjects.put(OUTCOME_OBJECTS_NAME, outcomeObject.get(OUTCOME_OBJECTS_NAME) == JSONObject.NULL ? null : outcomeObject.get(OUTCOME_OBJECTS_NAME));
         }

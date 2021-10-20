@@ -40,7 +40,7 @@ CREATE TABLE IF NOT EXISTS crimes(
 
 CREATE TABLE IF NOT EXISTS outcome_objects(
     "outcome_object_id" bigserial PRIMARY KEY,
-    "id" bigint,
+    "id" VARCHAR(255) UNIQUE NOT NULL,
     "name" VARCHAR(255)
 );
 
@@ -59,6 +59,7 @@ CREATE TABLE IF NOT EXISTS stopAndSearches(
     "legislation" VARCHAR(255),
     "object_of_search" VARCHAR(255),
     "outcome" VARCHAR(255),
+    "outcome_object" bigint  REFERENCES outcome_objects (outcome_object_id),
     "outcome_linked_to_object_of_search" BOOLEAN,
     "removal_of_more_than_outer_clothing" BOOLEAN
 );

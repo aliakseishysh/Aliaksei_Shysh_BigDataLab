@@ -50,6 +50,7 @@ public class DatabaseColumn {
     public static final String SAS_LEGISLATION = "legislation";
     public static final String SAS_OBJECT_OF_SEARCH = "object_of_search";
     public static final String SAS_OUTCOME = "outcome";
+    public static final String SAS_OUTCOME_OBJECT = "outcome_object";
     public static final String SAS_OUTCOME_LINKED_TO_OBJECT_OF_SEARCH = "outcome_linked_to_object_of_search";
     public static final String SAS_REMOVAL_OF_MORE_THAN_OUTER_CLOTHING = "removal_of_more_than_outer_clothing";
     // outcome_objects

@@ -17,12 +17,12 @@ public class StopAndSearchesDaoImpl implements PoliceApiDao {
     private static final PoliceApiDao instance = new StopAndSearchesDaoImpl();
     private static final String INSERT_SAS = "INSERT INTO stopAndSearches(type, involved_person, datetime, " +
             "operation, operation_name, location, gender, age_range, self_defined_ethnicity, " +
-            "officer_defined_ethnicity, legislation, object_of_search, outcome, " +
+            "officer_defined_ethnicity, legislation, object_of_search, outcome, outcome_object, " +
             "outcome_linked_to_object_of_search, removal_of_more_than_outer_clothing) " +
-            "VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+            "VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
     private static final String SELECT_UNIQUE_SAS_ID = "SELECT street_id FROM streets WHERE id = ?";
     private static final String INSERT_OUTCOME_OBJECT = "INSERT INTO outcome_objects(id, name) VALUES(?, ?)";
-    private static final String SELECT_UNIQUE_OUTCOME_OBJECT = "SELECT id FROM outcome_objects WHERE id = ?";
+    private static final String SELECT_UNIQUE_OUTCOME_OBJECT = "SELECT outcome_object_id FROM outcome_objects WHERE id = ?";
 
 
     private StopAndSearchesDaoImpl() {
@@ -43,6 +43,7 @@ public class StopAndSearchesDaoImpl implements PoliceApiDao {
         Query query = FluentConnector.getConnector().query();
         return query.transaction().in(() -> {
             Map<String, Object> location = (Map<String, Object>) sas.get(DatabaseColumn.LOCATIONS);
+            Map<String, Object> outcomeObject = (Map<String, Object>) sas.get(DatabaseColumn.OUTCOME_OBJECTS);
             Map<String, Object> street = null;
             Long streetId = null;
             Long locationId = null;
@@ -54,14 +55,14 @@ public class StopAndSearchesDaoImpl implements PoliceApiDao {
                 locationId = findLocationId(query, location, streetId);
                 locationId = locationId == -1 ? addNewLocation(query, location, streetId) : locationId;
             }
-//            Long outcomeObjectId = -1L;
-//            if (outcomeObject != null) {
-//                outcomeObjectId = findOutcomeObjectId(query, outcomeObject);
-//                outcomeObjectId = outcomeObjectId == -1 ? addNewOutcomeObject(query, outcomeObject) : outcomeObjectId;
-//            }
+            Long outcomeObjectId = null;
+            if (outcomeObject != null && outcomeObject != JSONObject.NULL) {
+                outcomeObjectId = findOutcomeObjectId(query, outcomeObject);
+                outcomeObjectId = outcomeObjectId == -1 ? addNewOutcomeObject(query, outcomeObject) : outcomeObjectId;
+            }
 
             Long sasId = findSasId(query, sas);
-            sasId = sasId == -1 ? addNewSas(query, sas, locationId) : sasId;
+            sasId = sasId == -1 ? addNewSas(query, sas, locationId, outcomeObjectId) : sasId;
             return sasId != -1;
         });
     }
@@ -78,7 +79,7 @@ public class StopAndSearchesDaoImpl implements PoliceApiDao {
      * @param locationId id of location
      * @return generated id
      */
-    private long addNewSas(Query query, Map<String, Object> sas, Long locationId) {
+    private long addNewSas(Query query, Map<String, Object> sas, Long locationId, Long outcomeObjectId) {
         List<List<?>> queryParameters = new ArrayList<>();
         List<Object> listParameters = new ArrayList<>();
         listParameters.add(sas.get(DatabaseColumn.SAS_TYPE));
@@ -95,6 +96,7 @@ public class StopAndSearchesDaoImpl implements PoliceApiDao {
         listParameters.add(sas.get(DatabaseColumn.SAS_OBJECT_OF_SEARCH));
 
         listParameters.add(sas.get(DatabaseColumn.SAS_OUTCOME));
+        listParameters.add(outcomeObjectId);
         listParameters.add(sas.get(DatabaseColumn.SAS_OUTCOME_LINKED_TO_OBJECT_OF_SEARCH));
         listParameters.add(sas.get(DatabaseColumn.SAS_REMOVAL_OF_MORE_THAN_OUTER_CLOTHING));
 
