@@ -26,9 +26,6 @@ function print_help_message() {
 ############################ GLOBALS ###########################################
 
 QUERY_NAME=''
-START_MONTH=''
-END_MONTH=''
-
 ROWS_COUNT=10
 
 HELP_FLAG=false
@@ -66,7 +63,7 @@ function parse_parameters() {
 
   OPTIND=1
 
-  while getopts hvq:s:e:r:f:-: OPT; do
+  while getopts hvq:r:s:-: OPT; do
     if [[ "$OPT" = "-" ]]; then                                                        # long option: reformulate OPT and OPTARG
       OPT="${OPTARG%%=*}"                                                              # extract long option name
       OPTARG="${OPTARG#"$OPT"}"                                                        # extract long option argument (may be empty)
@@ -76,10 +73,8 @@ function parse_parameters() {
       h | help) HELP_FLAG=true ;;
       v | verbose) VERBOSE_FLAG=true ;;
       q | query-name) needs_arg "$OPTARG"; QUERY_NAME="${OPTARG}" ;;
-      s | start-month) needs_arg "$OPTARG"; START_MONTH="${OPTARG}" ;;
-      e | end-month) needs_arg "$OPTARG"; END_MONTH="${OPTARG}" ;;
       r | rows-count) needs_arg "$OPTARG"; ROWS_COUNT="${OPTARG}" ;;
-      f | save-to-file) needs_arg "$OPTARG"; SAVE_TO_FILE="${OPTARG}" ;;
+      s | save-to-file) needs_arg "$OPTARG"; SAVE_TO_FILE="${OPTARG}" ;;
       ??*) die "Illegal option --${OPT}" ;;                                            # bad long option
       \?) exit 2 ;;                                                                    # bad short option (error reported via getopts)
     esac
@@ -132,7 +127,25 @@ function run() {
 
   if [ -n "${QUERY_NAME}" ]; then
       if [ "${QUERY_NAME}" = '1' ]; then
-        psql -d task_4 -v start_month=\'"${START_MONTH}-01"\' -v end_month=\'"${END_MONTH}-01"\' -f ./sql/queries/"${QUERY_NAME}".sql >"${SAVE_TO_FILE}"
+        psql -d task_4 -v start_month="'2021-01-01'" -v end_month="'2021-03-01'" -f ./sql/queries/"${QUERY_NAME}".sql >"${SAVE_TO_FILE}"
+        column -t "${SAVE_TO_FILE}" -s ":" | sed -n 1,$((ROWS_COUNT+2))p
+      elif [ "${QUERY_NAME}" = '2' ]; then
+        psql -d task_4 -v start_month="'2021-01-01'" -v end_month="'2021-03-01'" -f ./sql/queries/"${QUERY_NAME}".sql >"${SAVE_TO_FILE}"
+        column -t "${SAVE_TO_FILE}" -s ":" | sed -n 1,$((ROWS_COUNT+2))p
+      elif [ "${QUERY_NAME}" = '3' ]; then
+        psql -d task_4 -v outcome_category="'Local resolution'" -v start_month="'2021-01-01'" \
+        -v end_month="'2021-03-01'" -f ./sql/queries/"${QUERY_NAME}".sql >"${SAVE_TO_FILE}"
+        column -t "${SAVE_TO_FILE}" -s ":" | sed -n 1,$((ROWS_COUNT+2))p
+      elif [ "${QUERY_NAME}" = '4' ]; then
+        psql -d task_4 -v start_date="'2021-01-01'" -v end_date="'2021-03-15'" \
+        -f ./sql/queries/"${QUERY_NAME}".sql >"${SAVE_TO_FILE}"
+        column -t "${SAVE_TO_FILE}" -s ":" | sed -n 1,$((ROWS_COUNT+2))p
+      elif [ "${QUERY_NAME}" = '5' ]; then
+        psql -d task_4 -v start_date="'2021-01-01'" -v end_date="'2021-03-15'" \
+        -f ./sql/queries/"${QUERY_NAME}".sql >"${SAVE_TO_FILE}"
+        column -t "${SAVE_TO_FILE}" -s ":" | sed -n 1,$((ROWS_COUNT+2))p
+      elif [ "${QUERY_NAME}" = '2' ]; then
+        psql -d task_4 -v start_month="'2021-01-01'" -v end_month="'2021-03-01'" -f ./sql/queries/"${QUERY_NAME}".sql >"${SAVE_TO_FILE}"
         column -t "${SAVE_TO_FILE}" -s ":" | sed -n 1,$((ROWS_COUNT+2))p
       fi
     else
