@@ -24,3 +24,12 @@ FROM stopAndSearches
 INNER JOIN cte ON stopAndSearches.officer_defined_ethnicity IS NOT DISTINCT FROM cte.cte_ethnicity
 WHERE rn = 1 AND stopAndSearches.datetime >= :start_date AND stopAndSearches.datetime <= :end_date
 ORDER BY stopAndSearches.officer_defined_ethnicity;
+
+--SELECT DISTINCT ON (stopAndSearches.officer_defined_ethnicity)
+--       stopAndSearches.officer_defined_ethnicity,
+--       stopAndSearches.object_of_search,
+--       count(*) AS ct
+--FROM   stopAndSearches
+--GROUP  BY stopAndSearches.officer_defined_ethnicity,
+--          stopAndSearches.object_of_search
+--ORDER  BY stopAndSearches.officer_defined_ethnicity, ct DESC, stopAndSearches.object_of_search;
