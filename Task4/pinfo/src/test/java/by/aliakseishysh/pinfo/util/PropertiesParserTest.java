@@ -16,4 +16,26 @@ public class PropertiesParserTest {
         String actual = (String) properties.get("test");
         Assert.assertEquals(actual, expected);
     }
+
+    @Test(expectedExceptions = { AssertionError.class })
+    public void parseOptionsEmptyTest() throws PinfoParseException {
+        String[] args = new String[] {  };
+        Properties properties = PropertiesParser.parseOptions(args);
+        Assert.fail("No AssertionError");
+    }
+
+    @Test
+    public void parseOptionsNoValueTest() throws PinfoParseException {
+        String[] args = new String[] { "-Dtest=" };
+        Properties properties = PropertiesParser.parseOptions(args);
+        String expected = "";
+        String actual = (String) properties.get("test");
+        Assert.assertEquals(actual, expected);
+    }
+
+    @Test(expectedExceptions = { AssertionError.class })
+    public void parseOptionsNullTest() throws PinfoParseException {
+        Properties properties = PropertiesParser.parseOptions(null);
+        Assert.fail("No AssertionError");
+    }
 }

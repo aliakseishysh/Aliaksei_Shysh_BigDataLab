@@ -14,5 +14,19 @@ public class DateCreatorTest {
         Assert.assertEquals(expected, actual);
     }
 
+    @Test
+    public void createDatesIncorrectTest() throws ParseException {
+        String[] expected = new String[] { "2000-10", "2020-11", "2020-12", "2021-02" };
+        String[] actual = DateHelper.createDates("2020-10", 4).toArray(new String[0]);
+        Assert.assertNotEquals(expected, actual);
+    }
+
+    @Test(expectedExceptions = {NullPointerException.class})
+    public void createDatesNullTest() throws ParseException {
+        String[] expected = new String[] { "2000-10", "2020-11", "2020-12", "2021-02" };
+        String[] actual = DateHelper.createDates(null, 4).toArray(new String[0]);
+        Assert.assertNotEquals(expected, actual);
+    }
+
 
 }

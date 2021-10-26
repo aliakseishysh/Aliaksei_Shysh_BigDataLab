@@ -66,4 +66,10 @@ public class MapperTest {
         String[] actual = Mapper.allCrimeResponseMapToStringArray(crimes);
         Assert.assertEquals(actual, expected);
     }
+
+    @Test(expectedExceptions = {NullPointerException.class})
+    public void allCrimeResponseMapToStringNullArrayTest() {
+        String[] actual = Mapper.allCrimeResponseMapToStringArray(null);
+        Assert.fail("No NullPointerException");
+    }
 }
