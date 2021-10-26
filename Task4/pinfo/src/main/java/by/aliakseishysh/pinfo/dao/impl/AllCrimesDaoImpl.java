@@ -41,9 +41,9 @@ public class AllCrimesDaoImpl implements PoliceApiDao {
         return query.transaction().in(() -> {
             Map<String, Object> location = (Map<String, Object>) crime.get(DatabaseColumn.LOCATIONS);
             Map<String, Object> outcome = (Map<String, Object>) crime.get(DatabaseColumn.OUTCOMES);
-            Map<String, Object> street = null;
+            Map<String, Object> street;
 
-            Long streetId = null;
+            Long streetId;
             Long locationId = null;
             if (location != null && location != JSONObject.NULL) {
                 street = (Map<String, Object>) location.get(DatabaseColumn.STREETS);
@@ -58,13 +58,15 @@ public class AllCrimesDaoImpl implements PoliceApiDao {
             if (outcome != null && outcome != JSONObject.NULL) {
                 outcomeId = findOutcomeId(query, outcome);
                 outcomeId = outcomeId == -1 ? addNewOutcome(query, outcome) : outcomeId;
-                // outcomeId = outcome != null ? addNewOutcome(query, outcome) : null;
             }
 
-            Long crimeId = findCrimeId(query, crime);
-            crimeId = crimeId == -1 ? addNewCrime(query, crime, locationId, outcomeId) : crimeId;
-
-            return crimeId != -1;
+            long crimeId = findCrimeId(query, crime);
+            boolean result = false;
+            if (crimeId == -1) {
+                crimeId = addNewCrime(query, crime, locationId, outcomeId);
+                result = crimeId != -1;
+            }
+            return result;
         });
     }
 
@@ -134,6 +136,13 @@ public class AllCrimesDaoImpl implements PoliceApiDao {
                 .firstResult(Mappers.singleLong()).orElse(-1L);
     }
 
+    /**
+     * Method for finding outcome id.
+     *
+     * @param query   performs operation on query
+     * @param outcome map representing outcome
+     * @return crime id or -1 otherwise
+     */
     private long findOutcomeId(Query query, Map<String, Object> outcome) {
         return query.select(SELECT_UNIQUE_OUTCOME)
                 .params(outcome.get(DatabaseColumn.OUTCOMES_CATEGORY), outcome.get(DatabaseColumn.OUTCOMES_DATE))

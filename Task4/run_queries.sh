@@ -127,14 +127,14 @@ function run() {
 
   if [ -n "${QUERY_NAME}" ]; then
       if [ "${QUERY_NAME}" = '1' ]; then
-        psql -d task_4 -v start_month="'2021-01-01'" -v end_month="'2021-03-01'" -f ./sql/queries/"${QUERY_NAME}".sql >"${SAVE_TO_FILE}"
+        psql -d task_4 -v start_month="'2021-01'" -v end_month="'2021-03'" -f ./sql/queries/"${QUERY_NAME}".sql >"${SAVE_TO_FILE}"
         column -t "${SAVE_TO_FILE}" -s ":" | sed -n 1,$((ROWS_COUNT+2))p
       elif [ "${QUERY_NAME}" = '2' ]; then
-        psql -d task_4 -v start_month="'2021-02-01'" -v end_month="'2021-04-01'" -f ./sql/queries/"${QUERY_NAME}".sql >"${SAVE_TO_FILE}"
+        psql -d task_4 -v start_month="'2021-02'" -v end_month="'2021-04'" -f ./sql/queries/"${QUERY_NAME}".sql >"${SAVE_TO_FILE}"
         column -t "${SAVE_TO_FILE}" -s ":" | sed -n 1,$((ROWS_COUNT+2))p
       elif [ "${QUERY_NAME}" = '3' ]; then
-        psql -d task_4 -v outcome_category="'Local resolution'" -v start_month="'2021-01-01'" \
-        -v end_month="'2021-03-01'" -f ./sql/queries/"${QUERY_NAME}".sql >"${SAVE_TO_FILE}"
+        psql -d task_4 -v outcome_category="'Local resolution'" -v start_month="'2021-01'" \
+        -v end_month="'2021-03'" -f ./sql/queries/"${QUERY_NAME}".sql >"${SAVE_TO_FILE}"
         column -t "${SAVE_TO_FILE}" -s ":" | sed -n 1,$((ROWS_COUNT+2))p
       elif [ "${QUERY_NAME}" = '4' ]; then
         psql -d task_4 -v start_date="'2021-01-01'" -v end_date="'2021-03-15'" \
@@ -145,7 +145,7 @@ function run() {
         -f ./sql/queries/"${QUERY_NAME}".sql >"${SAVE_TO_FILE}"
         column -t "${SAVE_TO_FILE}" -s ":" | sed -n 1,$((ROWS_COUNT+2))p
       elif [ "${QUERY_NAME}" = '6' ]; then
-        psql -d task_4 -v start_month="'2021-01-01'" -v end_month="'2021-03-01'" -f ./sql/queries/"${QUERY_NAME}".sql >"${SAVE_TO_FILE}"
+        psql -d task_4 -v start_month="'2021-01'" -v end_month="'2021-03'" -f ./sql/queries/"${QUERY_NAME}".sql >"${SAVE_TO_FILE}"
         column -t "${SAVE_TO_FILE}" -s ":" | sed -n 1,$((ROWS_COUNT+2))p
       fi
     else

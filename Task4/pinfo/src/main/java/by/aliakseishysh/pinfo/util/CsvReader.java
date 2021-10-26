@@ -3,8 +3,6 @@ package by.aliakseishysh.pinfo.util;
 import by.aliakseishysh.pinfo.exception.FileException;
 import com.opencsv.CSVReader;
 import com.opencsv.exceptions.CsvException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.FileReader;
 import java.io.IOException;
@@ -12,7 +10,7 @@ import java.util.List;
 
 public class CsvReader {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(CsvReader.class);
+    private static final int LINES_TO_SKIP_COUNT = 1;
 
     /**
      * Reads latitude and longitude from file
@@ -23,10 +21,9 @@ public class CsvReader {
      */
     public static List<String[]> readLines(String filePath) throws FileException {
         try (CSVReader reader = new CSVReader(new FileReader(filePath))) {
-            reader.skip(1);
+            reader.skip(LINES_TO_SKIP_COUNT);
             return reader.readAll();
         } catch (IOException | CsvException | NullPointerException e) {
-            LOGGER.error("Can't read csv file", e.getCause());
             throw new FileException("Can't read csv file: " + e.getCause());
         }
     }

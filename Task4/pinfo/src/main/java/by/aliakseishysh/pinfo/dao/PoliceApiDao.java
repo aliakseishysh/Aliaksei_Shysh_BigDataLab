@@ -97,9 +97,5 @@ public interface PoliceApiDao {
                         location.get(DatabaseColumn.LOCATIONS_LONGITUDE))
                 .firstResult(Mappers.singleLong()).orElse(-1L);
     }
-
-
-    default Object objectOrEmpty(Object object) {
-        return object == null ? "" : object;
-    }
+    
 }

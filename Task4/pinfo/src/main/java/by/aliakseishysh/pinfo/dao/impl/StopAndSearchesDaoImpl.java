@@ -15,12 +15,11 @@ import java.util.Map;
 public class StopAndSearchesDaoImpl implements PoliceApiDao {
 
     private static final PoliceApiDao instance = new StopAndSearchesDaoImpl();
-    private static final String INSERT_SAS = "INSERT INTO stopAndSearches(type, involved_person, datetime, " +
+    private static final String INSERT_SAS = "INSERT INTO stop_and_searches(type, involved_person, datetime, " +
             "operation, operation_name, location, gender, age_range, self_defined_ethnicity, " +
             "officer_defined_ethnicity, legislation, object_of_search, outcome, outcome_object, " +
             "outcome_linked_to_object_of_search, removal_of_more_than_outer_clothing) " +
             "VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
-    private static final String SELECT_UNIQUE_SAS_ID = "SELECT street_id FROM streets WHERE id = ?";
     private static final String INSERT_OUTCOME_OBJECT = "INSERT INTO outcome_objects(id, name) VALUES(?, ?)";
     private static final String SELECT_UNIQUE_OUTCOME_OBJECT = "SELECT outcome_object_id FROM outcome_objects WHERE id = ?";
 
@@ -44,8 +43,8 @@ public class StopAndSearchesDaoImpl implements PoliceApiDao {
         return query.transaction().in(() -> {
             Map<String, Object> location = (Map<String, Object>) sas.get(DatabaseColumn.LOCATIONS);
             Map<String, Object> outcomeObject = (Map<String, Object>) sas.get(DatabaseColumn.OUTCOME_OBJECTS);
-            Map<String, Object> street = null;
-            Long streetId = null;
+            Map<String, Object> street;
+            Long streetId;
             Long locationId = null;
             if (location != null && location != JSONObject.NULL) {
                 street = (Map<String, Object>) location.get(DatabaseColumn.STREETS);
@@ -60,10 +59,7 @@ public class StopAndSearchesDaoImpl implements PoliceApiDao {
                 outcomeObjectId = findOutcomeObjectId(query, outcomeObject);
                 outcomeObjectId = outcomeObjectId == -1 ? addNewOutcomeObject(query, outcomeObject) : outcomeObjectId;
             }
-
-            Long sasId = findSasId(query, sas);
-            sasId = sasId == -1 ? addNewSas(query, sas, locationId, outcomeObjectId) : sasId;
-            return sasId != -1;
+            return addNewSas(query, sas, locationId, outcomeObjectId) != -1;
         });
     }
 
@@ -108,12 +104,18 @@ public class StopAndSearchesDaoImpl implements PoliceApiDao {
         return result.get(0).firstKey().orElse(-1L);
     }
 
-
+    /**
+     * Internal method for adding new outcome object to database
+     *
+     * @param query   performs operation on query
+     * @param outcome map representing outcome object
+     * @return generated id
+     */
     private long addNewOutcomeObject(Query query, Map<String, Object> outcome) {
         List<List<?>> queryParameters = new ArrayList<>();
         List<Object> listParameters = new ArrayList<>();
-        listParameters.add(objectOrEmpty(outcome.get(DatabaseColumn.OUTCOME_OBJECTS_ID)));
-        listParameters.add(objectOrEmpty(outcome.get(DatabaseColumn.OUTCOME_OBJECTS_NAME)));
+        listParameters.add(outcome.get(DatabaseColumn.OUTCOME_OBJECTS_ID));
+        listParameters.add(outcome.get(DatabaseColumn.OUTCOME_OBJECTS_NAME));
         queryParameters.add(listParameters);
         List<UpdateResultGenKeys<Long>> result = query
                 .batch(INSERT_OUTCOME_OBJECT)
@@ -122,13 +124,13 @@ public class StopAndSearchesDaoImpl implements PoliceApiDao {
         return result.get(0).firstKey().orElse(-1L);
     }
 
-
-    private long findSasId(Query query, Map<String, Object> sas) {
-        return query.select(SELECT_UNIQUE_SAS_ID)
-                .params(sas.get(DatabaseColumn.SAS_SAS_ID))
-                .firstResult(Mappers.singleLong()).orElse(-1L);
-    }
-
+    /**
+     * Method for finding outcome object id.
+     *
+     * @param query          performs operation on query
+     * @param outcome_object map representing outcome object
+     * @return outcome object id or -1 otherwise
+     */
     private long findOutcomeObjectId(Query query, Map<String, Object> outcome_object) {
         return query.select(SELECT_UNIQUE_OUTCOME_OBJECT)
                 .params(outcome_object.get(DatabaseColumn.OUTCOME_OBJECTS_ID))

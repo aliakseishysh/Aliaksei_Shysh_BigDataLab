@@ -34,8 +34,8 @@ public class DatabaseColumn {
     public static final String CRIMES_LOCATION_TYPE = "location_type";
     public static final String CRIMES_LOCATION_SUBTYPE = "location_subtype";
     public static final String CRIMES_OUTCOME_STATUS = "outcome_status";
-    // stopAndSearches
-    public static final String SAS = "stopAndSearches";
+    // stop_and_searches
+    public static final String SAS = "stop_and_searches";
     public static final String SAS_SAS_ID = "sas_id";
     public static final String SAS_TYPE = "type";
     public static final String SAS_INVOLVED_PERSON = "involved_person";

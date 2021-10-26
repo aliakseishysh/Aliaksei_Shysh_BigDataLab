@@ -1,32 +1,26 @@
 package by.aliakseishysh.pinfo.util;
 
 import by.aliakseishysh.pinfo.exception.PinfoParseException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
-import java.sql.Timestamp;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.stream.IntStream;
 
-import static by.aliakseishysh.pinfo.dao.DatabaseColumn.SAS_DATETIME;
-
 public class DateHelper {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(DateHelper.class);
-    private static final SimpleDateFormat[] formats = new SimpleDateFormat[] {
+    private static final SimpleDateFormat[] formats = new SimpleDateFormat[]{
             new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssX"),
             new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSSSSX")
     };
 
     /**
      * Creates list of dates.
-     * @param startDate start date
+     *
+     * @param startDate  start date
      * @param monthCount month amount to create (including {@code startDate})
      * @return list of created dates
      * @throws ParseException if method can't parse {@code startDate}
@@ -50,11 +44,11 @@ public class DateHelper {
     }
 
     public static Date parseDate(String stringDate) throws PinfoParseException {
-        for (int i = 0; i < formats.length; i++) {
+        for (SimpleDateFormat format : formats) {
             try {
-                return formats[i].parse(stringDate);
+                return format.parse(stringDate);
             } catch (ParseException e) {
-                // LOGGER.info("Can't parse", e);
+                // nothing to do here
             }
         }
         throw new PinfoParseException("Can't parse date: " + stringDate);

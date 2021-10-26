@@ -2,15 +2,12 @@ package by.aliakseishysh.pinfo.util;
 
 import by.aliakseishysh.pinfo.exception.FileException;
 import com.opencsv.CSVWriter;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.FileWriter;
 import java.io.IOException;
 
 public class CsvWriter {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(CsvWriter.class);
     private final CSVWriter csvWriter;
 
     public CsvWriter(String filePath) throws FileException {
@@ -33,7 +30,6 @@ public class CsvWriter {
             this.csvWriter.writeNext(lineToWrite);
             this.csvWriter.flush();
         } catch (IOException e) {
-            LOGGER.error("Can't write to file", e);
             throw new FileException("Can't write to file", e);
         }
     }
@@ -42,7 +38,6 @@ public class CsvWriter {
         try {
             csvWriter.close();
         } catch (IOException e) {
-            LOGGER.error("Can't close to file", e);
             throw new FileException("Can't write to file", e);
         }
     }

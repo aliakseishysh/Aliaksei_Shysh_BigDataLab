@@ -1,8 +1,8 @@
 package by.aliakseishysh.pinfo.dao;
 
+import by.aliakseishysh.pinfo.exception.DaoException;
 import org.codejargon.fluentjdbc.api.FluentJdbc;
 import org.codejargon.fluentjdbc.api.FluentJdbcBuilder;
-import org.codejargon.fluentjdbc.internal.query.DefaultSqlHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -18,7 +18,10 @@ public class FluentConnector {
         try {
             fluentJdbc = new FluentJdbcBuilder()
                     .connectionProvider(HcpSource.getSource())
-                    .defaultSqlHandler(DefaultSqlHandler::new)
+                    .defaultBatchSize(100)
+                    .defaultSqlHandler(() -> (e, sql) -> {
+                        throw new DaoException("Can't execute the query: " + sql, e);
+                    })
                     .build();
         } catch (RuntimeException e) {
             LOGGER.error("Can't initialize FluentJDBC", e);

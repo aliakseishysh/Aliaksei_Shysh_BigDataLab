@@ -10,7 +10,7 @@ public class NotFoundCommand implements Command {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(NotFoundCommand.class);
     /**
-     * Command to execute
+     * Command to execute if no command with specified name was found
      *
      * @param properties command line arguments
      * @throws CommandException if command can't be performed
