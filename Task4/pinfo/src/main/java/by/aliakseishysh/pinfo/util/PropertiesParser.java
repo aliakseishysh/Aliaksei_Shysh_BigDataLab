@@ -6,14 +6,10 @@ import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.DefaultParser;
 import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.Properties;
 
 public class PropertiesParser {
-
-    private static final Logger logger = LoggerFactory.getLogger(PropertiesParser.class);
 
     /**
      * Parses command line arguments
@@ -32,7 +28,6 @@ public class PropertiesParser {
             }
             return properties;
         } catch (org.apache.commons.cli.ParseException e) {
-            logger.error("Can't parse command line arguments", e);
             throw new PinfoParseException("Can't parse command line arguments", e);
         }
     }

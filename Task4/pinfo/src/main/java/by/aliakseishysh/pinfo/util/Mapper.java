@@ -44,7 +44,7 @@ public class Mapper {
         String categoryStatus = outcome != null ? (String) outcome.get(OUTCOMES_CATEGORY) : null;
         Date date = outcome != null ? (Date) outcome.get(OUTCOMES_DATE) : null;
 
-        return new String[] {
+        return new String[]{
                 category, persistentId, month.toString(),
                 latitude, streetId.toString(), name,
                 longitude, context, id.toString(),

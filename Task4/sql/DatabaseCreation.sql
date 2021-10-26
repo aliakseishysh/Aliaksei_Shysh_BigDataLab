@@ -19,7 +19,6 @@ CREATE TABLE IF NOT EXISTS locations(
 
 CREATE TABLE IF NOT EXISTS outcomes(
     "status_id" bigserial PRIMARY KEY,
-    -- "category" status,
     "category" VARCHAR(255),
     "date" DATE
 );
@@ -44,7 +43,7 @@ CREATE TABLE IF NOT EXISTS outcome_objects(
     "name" VARCHAR(255)
 );
 
-CREATE TABLE IF NOT EXISTS stopAndSearches(
+CREATE TABLE IF NOT EXISTS stop_and_searches(
     "sas_id" bigserial PRIMARY KEY,
     "type" VARCHAR(25),
     "involved_person" BOOLEAN,

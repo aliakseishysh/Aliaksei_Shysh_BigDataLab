@@ -80,7 +80,7 @@ public class DataDownloader {
                 futuresSize++;
             }
             executorService.shutdown();
-            executorService.awaitTermination(20, TimeUnit.SECONDS);
+            executorService.awaitTermination(30, TimeUnit.SECONDS);
         } catch (InterruptedException e) {
             logger.debug("Thread was interrupted: {}", e.getMessage());
             executorService.shutdownNow();
@@ -99,6 +99,9 @@ public class DataDownloader {
         private CallableDownloader(String uri) {
             this.uri = uri;
         }
+
+        private static final int DOWNLOAD_ATTEMPTS_COUNT = 5;
+        private static final int THREAD_MILLIS_TO_WAIT = 1000;
 
         @Override
         public Boolean call() {
@@ -119,7 +122,8 @@ public class DataDownloader {
                             result = true;
                             break;
                         case 429:
-                            if (runIndex < 5) {
+                            if (runIndex < DOWNLOAD_ATTEMPTS_COUNT) {
+                                Thread.sleep(THREAD_MILLIS_TO_WAIT);
                                 logger.info(response.getStatusLine() + ": Redownloading " + b);
                                 runIndex++;
                                 call();
@@ -134,6 +138,8 @@ public class DataDownloader {
                 }
             } catch (IOException e) {
                 logger.error("Connection problem: {}", e.getMessage());
+            } catch (InterruptedException e) {
+                logger.info("Thread was interrupted", e.getCause());
             }
             return result;
         }
