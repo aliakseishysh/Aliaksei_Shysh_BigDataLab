@@ -5,9 +5,10 @@ import java.util.regex.Pattern;
 public class ArgumentValidator {
 
     private static final String CORRECT_DATE = "^\\d{4}-\\d{2}$";
-    private static final String CORRECT_MONTH = "^\\d{1,5}$";
+    private static final String CORRECT_MONTH = "^[1-9][0-9]{0,5}$";
 
-    private ArgumentValidator() {}
+    private ArgumentValidator() {
+    }
 
     public static boolean validateDate(String date) {
         return date != null && Pattern.matches(CORRECT_DATE, date);
