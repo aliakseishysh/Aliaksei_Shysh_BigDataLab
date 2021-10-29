@@ -41,8 +41,8 @@ public class App {
      * Initializes HikariCP and FluentJDBC
      */
     private static void init() {
-        HcpSource.getSource();
-        FluentConnector.getConnector();
+        // HcpSource.getSource();
+        // FluentConnector.getConnector();
     }
 
 
