@@ -84,6 +84,7 @@ public class DataDownloader {
         } catch (InterruptedException e) {
             logger.debug("Thread was interrupted: {}", e.getMessage());
             executorService.shutdownNow();
+            Thread.currentThread().interrupt();
         }
         logger.info("Downloaded: " + responses.size() + "; Requested: " + requestUris.size());
         return responses;
